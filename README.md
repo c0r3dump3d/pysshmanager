@@ -89,7 +89,7 @@ Now you can interact with the prompt, for example:
    pysshmgr> connect 1
    pysshmgr> connect 1/3
    pysshmgr> connect 1,3
-   pysshmgr> connect comuterhome
+   pysshmgr> connect computerhome
 
 ```
  * Thank's to xpane you can open several ssh terminals with synchronization:
