@@ -30,7 +30,7 @@ Then:
 Configuration:
 =============
 
-pySSHManager has configuration file where you can defined some variables:
+pySSHManager has configuration file (`pySSHManager.conf`) where you can defined some variables:
 
 ```
   #Default TCP port for SSH service
