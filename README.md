@@ -3,7 +3,7 @@
 What's pySSHManager?
 ====================
 
-pySSHManager it's a simple Python3 script to manage SSH connection that it's base in two very interesting tools <a href="https://github.com/prompt-toolkit/python-prompt-toolkit">python-prompt-toolkit</a>
+pySSHManager it's a simple Python3 script to manage SSH connection with the console that it's base in two very interesting tools <a href="https://github.com/prompt-toolkit/python-prompt-toolkit">python-prompt-toolkit</a>
 and <a href="https://github.com/greymd/tmux-xpanes">xpanes</a>. It works scanning a single host or entire network to detect open ssh service and then manage the host in order to make connections in several forms.
     
 Installation:
