@@ -56,7 +56,7 @@ Simply you can run the script:
 
 ```
    cd pysshmanager
-   ./pysshmgr>
+   ./pySSHManager.py 
 ```
 
 Now you can interact with the prompt, for example:
