@@ -284,21 +284,22 @@ def connection(hosts_connect):
     fj = " " + user + "@"
 
     # Special case to avoid the noisy gnome-terminal
-    if "gnome-terminal" in terminal:
+    if "gnome" in terminal:
         try:
             termi = (str(check_output(["/usr/sbin/which",
                                        terminal],
                                       universal_newlines=True,
                                       stderr=subprocess.PIPE))).split("\n")[0]
         except subprocess.CalledProcessError:
-            print("[-] Unable to open the terminal. Please the terminal application.")
+            print("[-] Unable to open the terminal. Please check the terminal application.")
             return
-            if sync == 1:
-                command = termi + " -q -e \'/usr/sbin/xpanes -c \"ssh -p " + \
-                    port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
-            else:
-                command = termi + " -q -e \'/usr/sbin/xpanes -d -c \"ssh -p " + \
-                    port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
+        if sync == 1:
+            command = termi + " -q -e \'/usr/sbin/xpanes -c \"ssh -p " + \
+                port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
+            print(command)
+        else:
+            command = termi + " -q -e \'/usr/sbin/xpanes -d -c \"ssh -p " + \
+                port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
 
     else:
         try:
@@ -318,8 +319,9 @@ def connection(hosts_connect):
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
     try:
         proc = subprocess.Popen(command, shell=True, stdout=DEVNULL)
-    except BaseException:
-        print("[-] Unable to connect.")
+
+    except BaseException as e:
+        print("[-] Unable to connect: {0}".format(e))
 
 def deleteHosts(hosts_delete):
     for val2 in hosts_delete:
@@ -424,7 +426,7 @@ if __name__ == '__main__':
     numhost = 0
     sync = 0
     session = PromptSession(history=our_history)
-    commands = WordCompleter(['scan','\'list hosts\'','help','?',
+    options = WordCompleter(['scan','\'list hosts\'','help','?',
         'connect','reset','search','delete','save',
         ],ignore_case=True)
 
@@ -436,7 +438,7 @@ if __name__ == '__main__':
         table.default_alignment = BeautifulTable.ALIGN_CENTER
         table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
         table.column_headers = ["ID", "IP", "PORT", "FQDN", "GROUP"]
-        answer = session.prompt('pysshmgr> ', completer=commands,
+        answer = session.prompt('pysshmgr> ', completer=options,
                 complete_style=CompleteStyle.READLINE_LIKE)
         if answer.split(" ")[0] == "scan":
             hosts = []
