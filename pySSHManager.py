@@ -323,7 +323,6 @@ def connection(hosts_connect):
 
 def deleteHosts(hosts_delete):
     for val2 in hosts_delete:
-        print(id)
         hosts_present_hash.pop(val2)
         hosts_dns_hash.pop(val2)
         hosts_id_hash.pop(val2)
@@ -483,12 +482,15 @@ if __name__ == '__main__':
                     time.time() -
                     start_time,
                     "seconds.")
+                print("[+] Updating hostfile.csv file ...")
+                os.remove('hostfile.csv')
+                writeCSV()
 
                 if check == 0:
                     print("[-] No host added.")
                 else:
                     print(
-                        "[+] Some hosts were found ... (check with \'list hosts\' command.")
+                        "[+] Some hosts were found ... (check with \'list hosts\' command.)")
 
         elif answer.split(" ")[0] == "list":
             if answer.split(" ")[1] == "hosts":
