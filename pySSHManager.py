@@ -611,7 +611,7 @@ if __name__ == '__main__':
                 message = "Are you sure to delete this host(s)? (Y/n) "
                 action = yes_or_no(message)
                 if action:
-                     deleteSearch(hosts_delete)
+                     deleteHosts(hosts_delete)
                      del table
 
             elif "," in string:
@@ -630,7 +630,7 @@ if __name__ == '__main__':
                 message = "Are you sure to delete this host(s)? (Y/n) "
                 action = yes_or_no(message)
                 if action:
-                    deleteSearch(hosts_delete)
+                    deleteHosts(hosts_delete)
                     del table
 
             elif string.isdigit():
@@ -645,7 +645,7 @@ if __name__ == '__main__':
                 message = "Are you sure to delete this host(s)? (Y/n) "
                 action = yes_or_no(message)
                 if action:
-                    deleteSearch(hosts_delete)
+                    deleteHosts(hosts_delete)
                     del table
             
             else:
