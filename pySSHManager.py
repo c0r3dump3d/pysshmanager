@@ -528,6 +528,8 @@ if __name__ == '__main__':
         elif answer.split(" ")[0] == "list":
             if answer.split(" ")[1] == "hosts":
                 showHOSTS()
+            else:
+                print("[-] Option not found.")
 
         elif answer.split(" ")[0] == "search":
             term = answer.split(" ")[1]
