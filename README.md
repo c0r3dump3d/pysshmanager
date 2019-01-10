@@ -100,14 +100,52 @@ Now you can interact with the prompt, for example:
  
  * You can delete the host(s) form list by single ID, ID range, several ID or searching for a string:
  
- ```
+```
    pysshmgr> delete 1
    pysshmgr> delete 1/3
    pysshmgr> delete 1,3
    pysshmgr> delete comuterhome
 ```
 
-* In order to save the change in the list of host(s) you run `save` command or `exit`.  
+ * You can change several options during the execution of the script:
+
+ ```
+   pysshmgr> set port 2222 
+   pysshmgr> set user admin 
+   pysshmgr> set terminal termite 
+   pysshmgr> set group Hosting-computers 
+
+ ```
+
+ * And show the values of the options:
+
+ ```
+   pysshmgr> show 
+   ++++++++++++++++++++++++++++
+   +       Otions values      +
+   ++++++++++++++++++++++++++++
+
+   [+] TCP Port: 22
+   [+] User: root
+   [+] Default group: default
+   [+] Hosts file: hostfile.csv
+   [+] Terminal: mate-terminal
+   ++++++++++++++++++++++++++++
+ ```
+
+
+ * In order to save the change in the list of host(s) you run `save` command or `exit`:  
+
+ ```
+   pysshmgr> save 
+   pysshmgr> exit 
+ ```
+
+ * You can reset the list of host(s) with `reset` command:  
+
+ ```
+   pysshmgr> reset 
+ ```
  
  
  

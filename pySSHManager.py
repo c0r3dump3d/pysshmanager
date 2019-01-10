@@ -100,11 +100,20 @@ def help():
     print("[*] list host: List host(s) available.")
     print("[*] reset: Reset pySSHManager deleting all host(s).")
     print("[*] save:  Save all host(s) in a csv file specified in configuration.")
+    print("[*] show:  Show the values of differents options.")
+    print("[*] set: Set some options during script execution.")
+    print("""
+                -- port: Set TCP Port for ssh connection. 
+                -- user: Set user for the ssh connection. 
+                -- terminal: Set terminal. 
+                -- group: Set default group.
+                -- default: Read again the configuration file.
+            """)
     print("[*] connect: Connect with host(s): ")
     print("""
-                -- by ID: connect $ID
-                -- range ID: connect $ID(1)/$ID(2)
-                -- several ID: connect $ID(1),$ID(3)
+                -- by ID(s): connect $ID
+                -- range ID(s): connect $ID(1)/$ID(2)
+                -- several ID(s): connect $ID(1),$ID(3)
                 -- search and connect by string: connect "string" 
             """)
     print("[*] delete: Delete host(s): ")
@@ -142,6 +151,17 @@ def searchALL(term):
 
     print(table)
 
+def showValues():
+    print("++++++++++++++++++++++++++++")
+    print("+      Options values      +")
+    print("++++++++++++++++++++++++++++")
+    print()
+    print("[+] TCP Port: {0}".format(port))
+    print("[+] User: {0}".format(user))
+    print("[+] Default group: {0}".format(group))
+    print("[+] Hosts file: {0}".format(hostfile))
+    print("[+] Terminal: {0}".format(terminal))
+    print("++++++++++++++++++++++++++++")
 
 def searchConnect(term):
     hosts_found = []
@@ -393,6 +413,24 @@ def yes_or_no(message):
         else:
             sys.stdout.write("Please respond with 'yes' or 'no'\n")
 
+def readConfig():
+
+    warnings.simplefilter("ignore", ResourceWarning)
+    global hostfile
+    global terminal
+    global port
+    global user
+    global group
+
+    print("[+] Reading the config file ...")
+    config = configparser.ConfigParser()
+    config.read_file(open(r'pySSHManager.conf'))
+    terminal = config.get('config', 'terminal')
+    hostfile = config.get('config', 'hostfile')
+    port = config.get('config', 'port')
+    user = config.get('config', 'user')
+    group = config.get('config', 'group')
+
 
 if __name__ == '__main__':
 
@@ -413,11 +451,7 @@ if __name__ == '__main__':
         time.strftime("%X") +
         " - for legal purposes only.")
     print()
-    print("[+] Reading the config file ...")
-    config = configparser.ConfigParser()
-    config.read_file(open(r'pySSHManager.conf'))
-    terminal = config.get('config', 'terminal')
-    hostfile = config.get('config', 'hostfile')
+    readConfig()
 
     print("[+] Reading for previous host(s) ...")
     loadCSV()
@@ -427,13 +461,10 @@ if __name__ == '__main__':
     sync = 0
     session = PromptSession(history=our_history)
     options = WordCompleter(['scan','\'list hosts\'','help','?',
-        'connect','reset','search','delete','save',
+        'connect','reset','search','delete','save','set','show',
         ],ignore_case=True)
 
     while True:
-        port = config.get('config', 'port')
-        user = config.get('config', 'user')
-        group = config.get('config', 'group')
         table = BeautifulTable(max_width=100)
         table.default_alignment = BeautifulTable.ALIGN_CENTER
         table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
@@ -505,23 +536,7 @@ if __name__ == '__main__':
         elif answer.split(" ")[0] == "connect":
             string = answer.split(" ")[1]
             try:
-                if answer.split(" ")[2] == "user":
-                    if answer.split(" ")[3]:
-                        user = answer.split(" ")[3]
-                    else:
-                        pass
-                elif answer.split(" ")[2] == "sync":
-                    sync = 1
-
-                elif answer.split(" ")[2] == "port":
-                    port = answer.split(" ")[3]
-
-                elif answer.split(" ")[3] == "port":
-                    port = answer.split(" ")[4]
-                else:
-                    pass
-
-                if answer.split(" ")[4] == "sync":
+                if answer.split(" ")[2] == "sync":
                     sync = 1
             except BaseException:
                 pass
@@ -662,12 +677,40 @@ if __name__ == '__main__':
                 loadCSV()
             else:
                 pass
-            
+
+        elif answer.split(" ")[0] == "set":
+
+            if answer.split(" ")[1] == "port":
+                port = answer.split(" ")[2] 
+                print("[+] Port defined to vale {0}".format(port))
+
+            elif answer.split(" ")[1] == "user":
+                user = answer.split(" ")[2] 
+                print("[+] User defined to vale {0}".format(user))
+
+            elif answer.split(" ")[1] == "terminal":
+                terminal = answer.split(" ")[2] 
+                print("[+] Terminal defined to vale {0}".format(terminal))
+
+            elif answer.split(" ")[1] == "group":
+                group = answer.split(" ")[2] 
+                print("[+] Default group defined to vale {0}".format(group))
+
+            elif answer.split(" ")[1] == "default":
+                readConfig()
+
+            else:
+                print("[-] Option not defined.")
+
+
         elif answer.split(" ")[0] == "help":
             help()
 
         elif answer.split(" ")[0] == "?":
             help()
+
+        elif answer.split(" ")[0] == "show":
+            showValues()
 
         elif answer.split(" ")[0] == "save":
             print("[+] Updating hostfile.csv file ...")
