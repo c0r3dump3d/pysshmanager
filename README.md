@@ -69,7 +69,7 @@ Now you can interact with the prompt, for example:
 
  * You can list the host(s) detected:
  ```
-    pysshmgr> list hots
+    pysshmgr> list hosts
     
 +----+----------------+------+-----------------------------------------------------+---------------+
 | ID |       IP       | PORT |                        FQDN                         |     GROUP     |
