@@ -97,7 +97,7 @@ def help():
     print("[+] Available commands: ")
     print()
     print("[*] scan: Scan a single Ip or Network -- scan 192.168.14, scan 192.168.1.0/24")
-    print("[*] list host: List host(s) available.")
+    print("[*] list: List available host(s).")
     print("[*] reset: Reset pySSHManager deleting all host(s).")
     print("[*] save:  Save all host(s) in a csv file specified in configuration.")
     print("[*] show:  Show the values of differents options.")
@@ -460,7 +460,7 @@ if __name__ == '__main__':
     numhost = 0
     sync = 0
     session = PromptSession(history=our_history)
-    options = WordCompleter(['scan','\'list hosts\'','help','?',
+    options = WordCompleter(['scan','list','help','?',
         'connect','reset','search','delete','save','set','show',
         ],ignore_case=True)
 
@@ -523,13 +523,11 @@ if __name__ == '__main__':
                     print("[-] No host added.")
                 else:
                     print(
-                        "[+] Some hosts were found ... (check with \'list hosts\' command.)")
+                        "[+] Some hosts were found ... (check with \'list\' command.)")
 
         elif answer.split(" ")[0] == "list":
-            if answer.split(" ")[1] == "hosts":
-                showHOSTS()
-            else:
-                print("[-] Option not found.")
+
+            showHOSTS()
 
         elif answer.split(" ")[0] == "search":
             term = answer.split(" ")[1]
