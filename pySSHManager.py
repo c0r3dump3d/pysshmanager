@@ -306,7 +306,7 @@ def connection(hosts_connect):
     # Special case to avoid the noisy gnome-terminal
     if "gnome" in terminal:
         try:
-            termi = (str(check_output(["/usr/sbin/which",
+            termi = (str(check_output(["/usr/bin/which",
                                        terminal],
                                       universal_newlines=True,
                                       stderr=subprocess.PIPE))).split("\n")[0]
@@ -314,16 +314,16 @@ def connection(hosts_connect):
             print("[-] Unable to open the terminal. Please check the terminal application.")
             return
         if sync == 1:
-            command = termi + " -q -e \'/usr/sbin/xpanes -c \"ssh -p " + \
+            command = termi + " -q -e \'" + xpan + " -c \"ssh -p " + \
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
             print(command)
         else:
-            command = termi + " -q -e \'/usr/sbin/xpanes -d -c \"ssh -p " + \
+            command = termi + " -q -e \'" + xpan + " -d -c \"ssh -p " + \
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
 
     else:
         try:
-            termi = (str(check_output(["/usr/sbin/which",
+            termi = (str(check_output(["/usr/bin/which",
                                        terminal],
                                       universal_newlines=True,
                                       stderr=subprocess.PIPE))).split("\n")[0]
@@ -332,16 +332,18 @@ def connection(hosts_connect):
             return
 
         if sync == 1:
-            command = termi + " -e \'/usr/sbin/xpanes -c \"ssh -p " + \
+            command = termi + " -e \'" + xpan + " -c \"ssh -p " + \
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
         else:
-            command = termi + " -e \'/usr/sbin/xpanes -d -c \"ssh -p " + \
-                port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
+            command = termi + " -e \'" + xpan + " -d -c \"ssh -p " + \
+                port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"  
+    
     try:
-        proc = subprocess.Popen(command, shell=True, stdout=DEVNULL)
+        proc = subprocess.Popen(command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
 
     except BaseException as e:
         print("[-] Unable to connect: {0}".format(e))
+
 
 def deleteHosts(hosts_delete):
     for val2 in hosts_delete:
@@ -451,6 +453,20 @@ if __name__ == '__main__':
         time.strftime("%X") +
         " - for legal purposes only.")
     print()
+
+    print("[+] Checking if xpanes is present ...", end='')
+    try:
+         xpan = (str(check_output(["/usr/bin/which",
+                                     "xpanes"],
+                                     universal_newlines=True,
+                                     stderr=subprocess.PIPE))).split("\n")[0]
+
+    except subprocess.CalledProcessError:
+
+         print("[-] Unable to find xpanes. You need to install xpanes (https://github.com/greymd/tmux-xpanes/wiki/Installation).")
+         exit(1)
+
+    print(" Ok.")
     readConfig()
 
     print("[+] Reading for previous host(s) ...")
@@ -458,13 +474,13 @@ if __name__ == '__main__':
 
     our_history = FileHistory('.history-commands')
     numhost = 0
-    sync = 0
     session = PromptSession(history=our_history)
     options = WordCompleter(['scan','list','help','?',
         'connect','reset','search','delete','save','set','show',
         ],ignore_case=True)
 
     while True:
+        sync = 0
         table = BeautifulTable(max_width=100)
         table.default_alignment = BeautifulTable.ALIGN_CENTER
         table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
