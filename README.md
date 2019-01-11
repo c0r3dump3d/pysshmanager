@@ -19,7 +19,7 @@ Previosly we need some python dependences:
   pip install IPy
   
 ```
-And <a href="https://github.com/greymd/tmux-xpanes/wiki/Installation">install xpanes</a>.
+Now <a href="https://github.com/greymd/tmux-xpanes/wiki/Installation">install xpanes</a>.
 
 Then:
 
@@ -49,6 +49,30 @@ pySSHManager has configuration file (`pySSHManager.conf`) where you can defined 
   #The path of CSV file to save the host(s) information
   hostfile=hostfile.csv
 ```
+If you have not previously used tmux a good configuration tmux file (.tmux.conf) is:
+
+```
+setw -g mouse on
+bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'select-pane -t=; copy-mode -e; send-keys -M'"
+bind -n WheelDownPane select-pane -t= \; send-keys -M
+bind -n C-WheelUpPane select-pane -t= \; copy-mode -e \; send-keys -M
+bind -T copy-mode-vi    C-WheelUpPane   send-keys -X halfpage-up
+bind -T copy-mode-vi    C-WheelDownPane send-keys -X halfpage-down
+bind -T copy-mode-emacs C-WheelUpPane   send-keys -X halfpage-up
+bind -T copy-mode-emacs C-WheelDownPane send-keys -X halfpage-down
+
+# To copy, left click and drag to highlight text in yellow, 
+# once you release left click yellow text will disappear and will automatically be available in clibboard
+# # Use vim keybindings in copy mode
+setw -g mode-keys vi
+# Update default binding of `Enter` to also use copy-pipe
+unbind -T copy-mode-vi Enter
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "xclip -selection c"
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "xclip -in -selection clipboard"
+bind -T copy-mode-vi DoubleClick1Pane select-pane\; send -X select-word\; send -X stop-selection
+```
+A good <a href='https://danielmiessler.com/study/tmux/'>tmux tutorial</a>.
+
 Usage:
 ======
 
