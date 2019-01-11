@@ -13,10 +13,10 @@ Previosly we need some python dependences:
 
 ```
 
-  pip install prompt_toolkit
-  pip install beautifultable
-  pip install configparser
-  pip install IPy
+  sudo pip install prompt_toolkit
+  sudo pip install beautifultable
+  sudo pip install configparser
+  sudo pip install IPy
   
 ```
 Now <a href="https://github.com/greymd/tmux-xpanes/wiki/Installation">install xpanes</a>.
