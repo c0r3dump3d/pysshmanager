@@ -50,7 +50,7 @@ pySSHManager has configuration file (`pySSHManager.conf`) where you can defined 
   #The path of CSV file to save the host(s) information
   hostfile=hostfile.csv
 ```
-If you have not previously used tmux a good configuration tmux file (.tmux.conf) is:
+How xpanes use tmux if you have not previously used tmux a good configuration tmux file (.tmux.conf) is:
 
 ```
 setw -g mouse on
