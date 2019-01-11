@@ -13,10 +13,10 @@ Previosly we need some python dependences:
 
 ```
 
-  sudo pip install prompt_toolkit
-  sudo pip install beautifultable
-  sudo pip install configparser
-  sudo pip install IPy
+  $ sudo pip install prompt_toolkit
+  $ sudo pip install beautifultable
+  $ sudo pip install configparser
+  $ sudo pip install IPy
   
 ```
 Now <a href="https://github.com/greymd/tmux-xpanes/wiki/Installation">install xpanes</a>.
@@ -24,7 +24,7 @@ Now <a href="https://github.com/greymd/tmux-xpanes/wiki/Installation">install xp
 Then:
 
 ```
-  git clone https://github.com/c0r3dump3d/pysshmanager.git
+  $ git clone https://github.com/c0r3dump3d/pysshmanager.git
 ```
 
 Configuration:
@@ -79,8 +79,8 @@ Usage:
 Simply you can run the script:
 
 ```
-   cd pysshmanager
-   ./pySSHManager.py 
+   $ cd pysshmanager
+   $ ./pySSHManager.py 
 ```
 
 Now you can interact with the prompt, for example:
