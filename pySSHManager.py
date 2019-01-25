@@ -6,7 +6,7 @@ __license__="""
 
 pySSHManager
 
-Version 0.1
+Version 0.1.5
 
 A simple Python3 script to manage SSH connection.
 
@@ -41,6 +41,8 @@ import sys
 import hashlib
 import string
 import warnings
+import signal
+import psutil
 
 try:
     from prompt_toolkit import PromptSession
@@ -65,6 +67,13 @@ try:
 
 except ImportError:
     print("You need to install configparser python  module. pip install configparser")
+    exit(1)
+
+try:
+    import psutil 
+
+except ImportError:
+    print("You need to install psutil python  module. pip install psutil")
     exit(1)
 
 from subprocess import DEVNULL
@@ -101,6 +110,12 @@ def help():
     print("[*] reset: Reset pySSHManager deleting all host(s).")
     print("[*] save:  Save all host(s) in a csv file specified in configuration.")
     print("[*] show:  Show the values of differents options.")
+    print("[*] procs: Show PID of terminal sessions process.")
+    print("[*] kill: Kill terminal sessions process.")
+    print("""
+                -- all: Kill all terminal sessions process.
+                -- PID: Kill process with PID. 
+            """)
     print("[*] set: Set some options during script execution.")
     print("""
                 -- port: Set TCP Port for ssh connection. 
@@ -259,6 +274,33 @@ def writeCSV():
             tcpport = hosts_port_hash[i]
             csvfilewrite.writerow([id, ip, tcpport, dns, group])
 
+def killProc(pid):
+     
+    if str(pid) in process:
+        print("[+] Killing terminal session with PID " + str(pid))
+        p = psutil.Process(int(pid))
+        for child in p.children(recursive=True):
+            child.kill()
+        p.kill()
+        process.remove(pid)
+    else:
+        print("[-] This process doesn't exist.")
+
+def killAll():
+
+    for sess in process:
+        killProc(sess)
+
+    del process[:]
+
+def listProcs():
+    
+    print("----------------------------------------")
+    print("--- List of PID of terminal sessions ---")
+    print("----------------------------------------")
+    print()
+    for i in process:
+        print ("[+] " + str(i))
 
 def connScan(hosts, port, group):
     warnings.simplefilter("ignore", ResourceWarning)
@@ -340,6 +382,8 @@ def connection(hosts_connect):
     
     try:
         proc = subprocess.Popen(command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+        print("[+] Open terminal with PID " + str(proc.pid))
+        process.append(str(proc.pid))
 
     except BaseException as e:
         print("[-] Unable to connect: {0}".format(e))
@@ -442,7 +486,11 @@ if __name__ == '__main__':
     hosts_id_hash = {}
     hosts_group_hash = {}
     hosts_port_hash = {}
+    
+
     chk = 1
+    global process
+    process = []
 
     # Read the configuration file
     welcome()
@@ -550,12 +598,19 @@ if __name__ == '__main__':
             searchALL(term)
 
         elif answer.split(" ")[0] == "connect":
-            string = answer.split(" ")[1]
-            try:
-                if answer.split(" ")[2] == "sync":
-                    sync = 1
-            except BaseException:
-                pass
+
+            if answer.split(" ")[1]:
+
+                string = answer.split(" ")[1]
+
+                try:
+                    if answer.split(" ")[2] == "sync":
+                        sync = 1
+                except BaseException:
+                    pass
+            else:
+                print("[+] Connect to ...?")
+                pass 
 
             hosts_connect = []
             if "/" in string:
@@ -719,6 +774,23 @@ if __name__ == '__main__':
                 print("[-] Option not defined.")
 
 
+        elif answer.split(" ")[0] == "kill":
+             
+            if answer.split(" ")[1] == "all":
+                killAll()
+
+            elif answer.split(" ")[1].isdigit():
+                pid = answer.split(" ")[1]
+                killProc(pid)
+
+            else:
+                print("[-] Command not found.")
+
+
+
+        elif answer.split(" ")[0] == "procs":
+            listProcs()
+
         elif answer.split(" ")[0] == "help":
             help()
 
@@ -734,9 +806,12 @@ if __name__ == '__main__':
             writeCSV()
 
         elif answer.split(" ")[0] == "exit":
+
             print("[+] Updating hostfile.csv file ...")
             os.remove('hostfile.csv')
             writeCSV()
+
+            killAll()
 
             print("[+] Have a nice day !!")
             exit(0)

@@ -158,12 +158,33 @@ Now you can interact with the prompt, for example:
    ++++++++++++++++++++++++++++
  ```
 
+ * You can manage the terminal session, showing the PID of the process:
+
+ ```
+   pysshmgr> procs 
+   ----------------------------------------
+   --- List of PID of terminal sessions ---
+   ----------------------------------------
+
+   [+] 4115
+   [+] 4304
+   [+] 4492
+   [+] 4681
+ ```
+
+ * And killing them:
+
+ ```
+   pysshmgr> kill all 
+   pysshmgr> kill 4681 
+ ```
+
 
  * In order to save the change in the list of host(s) you run `save` command or `exit`:  
 
  ```
    pysshmgr> save 
-   pysshmgr> exit 
+   pysshmgr> exit (Will kill all the terminal sessions) 
  ```
 
  * You can reset the list of host(s) with `reset` command:  
