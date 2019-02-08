@@ -293,7 +293,6 @@ def killProc(pid):
                 p.kill()
             except:
                 pass
-        process.remove(pid)
     else:
         print("[-] This process doesn't exist.")
 
