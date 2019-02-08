@@ -142,7 +142,7 @@ def help():
 def searchALL(term):
     table = BeautifulTable(max_width=100)
     table.default_alignment = BeautifulTable.ALIGN_CENTER
-    table.column_headers = ["ID", "IP", "PORT", "FQDN", "GROUP"]
+    table.column_headers = ["ID", "IP", "PORT", "FQDN", "NETWORK", "GROUP"]
     table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
     for val in hosts_id_hash:
 
@@ -150,18 +150,35 @@ def searchALL(term):
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]), 
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_dns_hash[val]:
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]), 
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_group_hash[val]:
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]), 
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
+                              str(hosts_group_hash[val])])
+
+        elif term in hosts_net_hash[val]:
+            table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
+                              str(hosts_port_hash[val]), 
+                              str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
+                              str(hosts_group_hash[val])])
+
+        elif term in hosts_port_hash[val]:
+            table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
+                              str(hosts_port_hash[val]), 
+                              str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
     print(table)
@@ -203,6 +220,14 @@ def searchConnect(term):
                               str(hosts_group_hash[val])])
 
         elif term in hosts_group_hash[val]:
+            hosts_found.append(hosts_present_hash[val])
+            table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
+                              str(hosts_port_hash[val]), 
+                              str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
+                              str(hosts_group_hash[val])])
+
+        elif term in hosts_net_hash[val]:
             hosts_found.append(hosts_present_hash[val])
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]), 
@@ -412,7 +437,7 @@ def searchDelete(term):
     hosts_found = []
     table = BeautifulTable(max_width=100)
     table.default_alignment = BeautifulTable.ALIGN_CENTER
-    table.column_headers = ["ID", "IP", "PORT", "FQDN", "GROUP"]
+    table.column_headers = ["ID", "IP", "PORT", "FQDN", "NETWORK", "GROUP"]
     table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
     for val in hosts_id_hash:
 
@@ -421,6 +446,7 @@ def searchDelete(term):
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]),
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_dns_hash[val]:
@@ -428,6 +454,7 @@ def searchDelete(term):
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]),
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_group_hash[val]:
@@ -435,6 +462,15 @@ def searchDelete(term):
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]),
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
+                              str(hosts_group_hash[val])])
+
+        elif term in hosts_net_hash[val]:
+            hosts_found.append(val)
+            table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
+                              str(hosts_port_hash[val]),
+                              str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_port_hash[val]:
