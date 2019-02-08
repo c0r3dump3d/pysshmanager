@@ -182,7 +182,7 @@ def searchConnect(term):
     hosts_found = []
     table = BeautifulTable(max_width=100)
     table.default_alignment = BeautifulTable.ALIGN_CENTER
-    table.column_headers = ["ID", "IP", "PORT", "FQDN", "GROUP"]
+    table.column_headers = ["ID", "IP", "PORT", "FQDN", "NETWORK", "GROUP"]
     table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
     for val in hosts_id_hash:
 
@@ -191,6 +191,7 @@ def searchConnect(term):
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]), 
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_dns_hash[val]:
@@ -198,6 +199,7 @@ def searchConnect(term):
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]), 
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_group_hash[val]:
@@ -205,6 +207,7 @@ def searchConnect(term):
             table.append_row([hosts_id_hash[val], str(hosts_present_hash[val]),
                               str(hosts_port_hash[val]), 
                               str(hosts_dns_hash[val]),
+                              str(hosts_net_hash[val]),
                               str(hosts_group_hash[val])])
 
         elif term in hosts_port_hash[val]:
@@ -229,10 +232,10 @@ def showHOSTS():
     table = BeautifulTable(max_width=100)
     table.default_alignment = BeautifulTable.ALIGN_CENTER
     table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
-    table.column_headers = ["ID", "IP", "PORT", "FQDN", "GROUP"]
+    table.column_headers = ["ID", "IP", "PORT", "FQDN", "NETWORK", "GROUP"]
     for i in hosts_present_hash:
         table.append_row([hosts_id_hash[i], str(hosts_present_hash[i]), str(
-            hosts_port_hash[i]), str(hosts_dns_hash[i]), 
+            hosts_port_hash[i]), str(hosts_dns_hash[i]), str(hosts_net_hash[i]), 
             str(hosts_group_hash[i])])
     print(table)
 
@@ -254,7 +257,8 @@ def loadCSV():
             hash_ip = hash_object.hexdigest()
             hosts_present_hash[hash_ip] = row[1]
             hosts_dns_hash[hash_ip] = row[3]
-            hosts_group_hash[hash_ip] = row[4]
+            hosts_net_hash[hash_ip] = row[4]
+            hosts_group_hash[hash_ip] = row[5]
             hosts_id_hash[hash_ip] = row[0]
             hosts_port_hash[hash_ip] = row[2]
 
@@ -272,7 +276,8 @@ def writeCSV():
             id = hosts_id_hash[i]
             group = hosts_group_hash[i]
             tcpport = hosts_port_hash[i]
-            csvfilewrite.writerow([id, ip, tcpport, dns, group])
+            network = hosts_net_hash[i]
+            csvfilewrite.writerow([id, ip, tcpport, dns, network, group])
 
 def killProc(pid):
      
@@ -280,8 +285,14 @@ def killProc(pid):
         print("[+] Killing terminal session with PID " + str(pid))
         p = psutil.Process(int(pid))
         for child in p.children(recursive=True):
-            child.kill()
-        p.kill()
+            try:
+                child.kill()
+            except:
+                pass
+            try:
+                p.kill()
+            except:
+                pass
         process.remove(pid)
     else:
         print("[-] This process doesn't exist.")
@@ -302,7 +313,7 @@ def listProcs():
     for i in process:
         print ("[+] " + str(i))
 
-def connScan(hosts, port, group):
+def connScan(hosts, port, group, net):
     warnings.simplefilter("ignore", ResourceWarning)
     numhost = len(hosts)
     lastkey = list(hosts_id_hash.items())
@@ -335,6 +346,7 @@ def connScan(hosts, port, group):
                     hosts_id_hash[hash_ip] = id
                     hosts_group_hash[hash_ip] = group
                     hosts_port_hash[hash_ip] = port
+                    hosts_net_hash[hash_ip] = net 
                     check = 1
             connSkt.close()
     return check
@@ -486,6 +498,7 @@ if __name__ == '__main__':
     hosts_id_hash = {}
     hosts_group_hash = {}
     hosts_port_hash = {}
+    hosts_net_hash = {}
     
 
     chk = 1
@@ -525,14 +538,14 @@ if __name__ == '__main__':
     session = PromptSession(history=our_history)
     options = WordCompleter(['scan','list','help','?',
         'connect','reset','search','delete','save','set','show',
-        ],ignore_case=True)
+        'kill','procs'],ignore_case=True)
 
     while True:
         sync = 0
         table = BeautifulTable(max_width=100)
         table.default_alignment = BeautifulTable.ALIGN_CENTER
         table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
-        table.column_headers = ["ID", "IP", "PORT", "FQDN", "GROUP"]
+        table.column_headers = ["ID", "IP", "PORT", "FQDN", "NETWORK", "GROUP"]
         answer = session.prompt('pysshmgr> ', completer=options,
                 complete_style=CompleteStyle.READLINE_LIKE)
         if answer.split(" ")[0] == "scan":
@@ -552,6 +565,7 @@ if __name__ == '__main__':
                 pass
 
             if "/" in target:
+                net = target
                 try:
                     for ip in IP(target):
                         hosts.append(str(ip))
@@ -564,6 +578,7 @@ if __name__ == '__main__':
                     print("[-] Invalid network address.")
                     chk = 0
             else:
+                net = target + "/32"
                 try:
                     IP(target)
                 except ValueError:
@@ -573,7 +588,7 @@ if __name__ == '__main__':
 
             if chk != 0:
                 start_time = time.time()
-                check = connScan(hosts, port, group)
+                check = connScan(hosts, port, group,net)
                 print(
                     "[+] Scan finished in",
                     time.time() -
@@ -662,7 +677,7 @@ if __name__ == '__main__':
                         ip = hosts_present_hash[j]
                         hosts_connect.append(ip)
                         table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
-                            hosts_port_hash[j]), str(hosts_dns_hash[j]), str(hosts_group_hash[j])])
+                            hosts_port_hash[j]), str(hosts_dns_hash[j]), str(hosts_net_hash[j]), str(hosts_group_hash[j])])
                         break
 
                 print(table)
