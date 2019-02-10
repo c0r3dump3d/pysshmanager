@@ -109,7 +109,10 @@ def help():
     print("[*] list: List available host(s).")
     print("[*] reset: Reset pySSHManager deleting all host(s).")
     print("[*] save:  Save all host(s) in a csv file specified in configuration.")
-    print("[*] show:  Show the values of differents options.")
+    print("[*] options:  Show the values of differents options.")
+    print("[*] networks: Show networks.")
+    print("[*] addnet: Add network.")
+    print("[*] delnet: Delete a network.")
     print("[*] procs: Show PID of terminal sessions process.")
     print("[*] kill: Kill terminal sessions process.")
     print("""
@@ -127,7 +130,7 @@ def help():
     print("[*] connect: Connect with host(s): ")
     print("""
                 -- by ID(s): connect $ID
-                -- range ID(s): connect $ID(1)/$ID(2)
+                -- range ID(s): connect $ID(1)-$ID(2)
                 -- several ID(s): connect $ID(1),$ID(3)
                 -- search and connect by string: connect "string" 
             """)
@@ -184,16 +187,17 @@ def searchALL(term):
     print(table)
 
 def showValues():
-    print("++++++++++++++++++++++++++++")
-    print("+      Options values      +")
-    print("++++++++++++++++++++++++++++")
+    print("----------------------------")
+    print("-----  Options values  -----")
+    print("----------------------------")
     print()
     print("[+] TCP Port: {0}".format(port))
     print("[+] User: {0}".format(user))
     print("[+] Default group: {0}".format(group))
     print("[+] Hosts file: {0}".format(hostfile))
     print("[+] Terminal: {0}".format(terminal))
-    print("++++++++++++++++++++++++++++")
+    print("[+] Timeout: {0}".format(timeout))
+    print("----------------------------")
 
 def searchConnect(term):
     hosts_found = []
@@ -352,7 +356,7 @@ def connScan(hosts, port, group, net):
             hash_object = hashlib.sha256(ip.encode('utf-8'))
             hash_ip = hash_object.hexdigest()
             connSkt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            connSkt.settimeout(1)
+            connSkt.settimeout(float(timeout))
             try:
                 result = connSkt.connect_ex((ip, int(port)))
             except BaseException:
@@ -433,6 +437,24 @@ def deleteHosts(hosts_delete):
         hosts_port_hash.pop(val2)
         hosts_group_hash.pop(val2)
 
+def showNetworks():
+    
+    i = 0
+    table = BeautifulTable(max_width=100)
+    table.default_alignment = BeautifulTable.ALIGN_CENTER
+    table.column_headers = ["ID","NETWORKS","GROUPS"]
+    table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
+    for net in networks:
+        table.append_row([i+1,net,groups[i]])
+        i = i + 1
+    print(table) 
+
+def delNetwork(netk):
+    j = networks.index(netk)
+    del networks[j]
+    del groups[j]
+
+
 def searchDelete(term):
     hosts_found = []
     table = BeautifulTable(max_width=100)
@@ -491,7 +513,21 @@ def searchDelete(term):
             pass
 
 
+def extracNet(target):
+    hosts[:] = []
+    try:
+       for ip in IP(target):
+          hosts.append(str(ip))
+    except ValueError:
+          print("[-] Invalid network address.")
+          chk = 0
+    except IndexError:
+          print("[-] Invalid network address.")
+          chk = 0
 
+    if len(hosts) > 1:
+        del hosts[0]
+        del hosts[-1]
 
 def yes_or_no(message):
 
@@ -514,6 +550,8 @@ def readConfig():
     global port
     global user
     global group
+    global timeout
+    
 
     print("[+] Reading the config file ...")
     config = configparser.ConfigParser()
@@ -523,6 +561,7 @@ def readConfig():
     port = config.get('config', 'port')
     user = config.get('config', 'user')
     group = config.get('config', 'group')
+    timeout = config.get('config', 'timeout')
 
 
 if __name__ == '__main__':
@@ -535,10 +574,16 @@ if __name__ == '__main__':
     hosts_port_hash = {}
     hosts_net_hash = {}
     
-
-    chk = 1
+    global chk
+    global hosts
     global process
+    global networks
+    global groups
     process = []
+    networks = []
+    groups = []
+    hosts = []
+    chk = 1
 
     # Read the configuration file
     welcome()
@@ -568,12 +613,17 @@ if __name__ == '__main__':
     print("[+] Reading for previous host(s) ...")
     loadCSV()
 
+    for ip in hosts_net_hash:
+        if hosts_net_hash[ip] not in networks:
+            networks.append(hosts_net_hash[ip])
+            groups.append(hosts_group_hash[ip])
+
     our_history = FileHistory('.history-commands')
     numhost = 0
     session = PromptSession(history=our_history)
     options = WordCompleter(['scan','list','help','?',
-        'connect','reset','search','delete','save','set','show',
-        'kill','procs'],ignore_case=True)
+        'connect','reset','search','delete','save','set','options',
+        'networks','addnet','delnet','kill','procs'],ignore_case=True)
 
     while True:
         sync = 0
@@ -584,64 +634,110 @@ if __name__ == '__main__':
         answer = session.prompt('pysshmgr> ', completer=options,
                 complete_style=CompleteStyle.READLINE_LIKE)
         if answer.split(" ")[0] == "scan":
-            hosts = []
-            target = answer.split(" ")[1]
 
             try:
-                if answer.split(" ")[2] == "port":
-                    port = answer.split(" ")[3]
-                else:
-                    group = answer.split(" ")[2]
-
-                if answer.split(" ")[3] == "port":
-                    port = answer.split(" ")[4]
+                test = answer.split(" ")[1] 
 
             except IndexError:
+                test = "none"
                 pass
 
-            if "/" in target:
-                net = target
-                try:
-                    for ip in IP(target):
-                        hosts.append(str(ip))
-                    del hosts[0]
-                    del hosts[-1]
-                except ValueError:
-                    print("[-] Invalid network address.")
-                    chk = 0
-                except IndexError:
-                    print("[-] Invalid network address.")
-                    chk = 0
+            if test == "all":
+                k2 = 0
+                hosts_present_hash = {}
+                hosts_dns_hash = {}
+                hosts_id_hash = {}
+                hosts_net_hash = {}
+                hosts_group_hash = {}
+                for k in networks:
+                    target = k
+                    print("[+] Scanning network " + target)
+                    group = groups[k2]
+                    k2 = k2 + 1
+                    extracNet(target)
+                    if chk != 0:
+                        start_time = time.time()
+                        check = connScan(hosts, port, group, target)
+                        print(
+                            "[+] Scan finished in",
+                            time.time() -
+                            start_time,
+                            "seconds.")
+                        print("[+] Updating hostfile.csv file ...")
+                        os.remove('hostfile.csv')
+                        writeCSV()
+
+                        if check == 0:
+                            print("[-] No host added.")
+                        else:
+                            print(
+                            "[+] Some hosts were found ... (check with \'list\' command.)")
+
             else:
-                net = target + "/32"
+                showNetworks()
+                num = int(input("Choose network to scan: "))
+                num = num - 1
                 try:
-                    IP(target)
-                except ValueError:
-                    print("[-] Invalid host address.")
-                    chk = 0
-                hosts.append(target)
+                    target = networks[num]
+                    groups = groups[num]
+                    extracNet(target)
 
-            if chk != 0:
-                start_time = time.time()
-                check = connScan(hosts, port, group,net)
-                print(
-                    "[+] Scan finished in",
-                    time.time() -
-                    start_time,
-                    "seconds.")
-                print("[+] Updating hostfile.csv file ...")
-                os.remove('hostfile.csv')
-                writeCSV()
+                    if chk != 0:
+                        start_time = time.time()
+                        check = connScan(hosts, port, group,target)
+                        print(
+                            "[+] Scan finished in",
+                            time.time() -
+                            start_time,
+                            "seconds.")
+                        print("[+] Updating hostfile.csv file ...")
+                        os.remove('hostfile.csv')
+                        writeCSV()
 
-                if check == 0:
-                    print("[-] No host added.")
-                else:
-                    print(
-                        "[+] Some hosts were found ... (check with \'list\' command.)")
+                        if check == 0:
+                            print("[-] No host added.")
+                        else:
+                            print(
+                            "[+] Some hosts were found ... (check with \'list\' command.)")
+
+                except IndexError:
+                    print("Network number not valid.")
+                    pass 
 
         elif answer.split(" ")[0] == "list":
 
             showHOSTS()
+
+        elif answer.split(" ")[0] == "addnet":
+    
+            try:
+                if "/" not in answer.split(" ")[1]:
+                    networks.append(answer.split(" ")[1]+"/32")
+                
+                else:
+                    networks.append(answer.split(" ")[1])
+
+            except IndexError:
+                print("Please, you need to especified a network CIDR.")
+                pass
+
+            try:
+                groups.append(answer.split(" ")[2])
+                group = answer.split(" ")[2]
+
+            except IndexError:
+                groups.append(group)
+                pass
+
+        elif answer.split(" ")[0] == "delnet":
+
+            try: 
+                delNetwork(answer.split(" ")[1])
+                searchDelete(answer.split(" ")[1])
+
+            except ValueError:
+                print("Network not found.")
+                pass
 
         elif answer.split(" ")[0] == "search":
             term = answer.split(" ")[1]
@@ -663,9 +759,9 @@ if __name__ == '__main__':
                 pass 
 
             hosts_connect = []
-            if "/" in string:
-                value1 = int(string.split("/")[0])
-                value2 = int(string.split("/")[1])
+            if "-" in string:
+                value1 = int(string.split("-")[0])
+                value2 = int(string.split("-")[1])
 
                 for i in list(range(value1, value2 + 1)):
                     for j in hosts_id_hash:
@@ -674,7 +770,7 @@ if __name__ == '__main__':
                             hosts_connect.append(ip)
                             table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
                                 hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_group_hash[j])])
+                                str(hosts_net_hash[j]),str(hosts_group_hash[j])])
                             break
                 print(table)
                 message = "Are you sure to connect to this host(s)? (Y/n) "
@@ -695,7 +791,7 @@ if __name__ == '__main__':
                             hosts_connect.append(ip)
                             table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
                                 hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_group_hash[j])])
+                                str(hosts_net_hash[j]), str(hosts_group_hash[j])])
                             break
                 print(table)
                 message = "Are you sure to connect to this host(s)? (Y/n) "
@@ -730,16 +826,16 @@ if __name__ == '__main__':
         elif answer.split(" ")[0] == "delete":
             string = answer.split(" ")[1]
             hosts_delete=[]
-            if "/" in string:
-                value1 = int(string.split("/")[0])
-                value2 = int(string.split("/")[1])
+            if "-" in string:
+                value1 = int(string.split("-")[0])
+                value2 = int(string.split("-")[1])
 
                 for i in list(range(value1, value2 + 1)):
                     for j in hosts_id_hash:
                         if str(hosts_id_hash[j]) == str(i):
                             table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
                                 hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_group_hash[j])])
+                                str(hosts_net_hash[j]), str(hosts_group_hash[j])])
                             hosts_delete.append(j)
                             break
 
@@ -758,7 +854,7 @@ if __name__ == '__main__':
                         if str(hosts_id_hash[j]) == str(value1):
                             table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
                                 hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_group_hash[j])])
+                                str(hosts_net_hash[j]), str(hosts_group_hash[j])])
                             hosts_delete.append(j)
                             break
 
@@ -774,7 +870,7 @@ if __name__ == '__main__':
                     if str(hosts_id_hash[j]) == str(string):
                         table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
                              hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                             str(hosts_group_hash[j])])
+                             str(hosts_net_hash[j]),str(hosts_group_hash[j])])
                         hosts_delete.append(j)
                         break
                 print(table)
@@ -795,6 +891,8 @@ if __name__ == '__main__':
                 hosts_present_hash = {}
                 hosts_dns_hash = {}
                 hosts_id_hash = {}
+                hosts_net_hash = {}
+                hosts_group_hash = {}
                 loadCSV()
             else:
                 pass
@@ -847,8 +945,11 @@ if __name__ == '__main__':
         elif answer.split(" ")[0] == "?":
             help()
 
-        elif answer.split(" ")[0] == "show":
+        elif answer.split(" ")[0] == "options":
             showValues()
+
+        elif answer.split(" ")[0] == "networks":
+            showNetworks()
 
         elif answer.split(" ")[0] == "save":
             print("[+] Updating hostfile.csv file ...")

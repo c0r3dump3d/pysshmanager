@@ -1,6 +1,4 @@
 
-![record](https://raw.githubusercontent.com/c0r3dump3d/pysshmanager/cd282819bd19ef41ee2ed13f5b479bf5661e6759/pysshmanager_record.gif)
-
 What's pySSHManager?
 ====================
 
@@ -87,10 +85,37 @@ Simply you can run the script:
 Now you can interact with the prompt, for example:
 * Scan for a single host or network (CIDR) and assing to a group of hosts:
 ```
-    pysshmgr> scan 192.168.1.16
-    pysshmgr> scan 192.168.1.0/24 Home_network
     
- ```
+    pysshmgr> addnet 192.168.1.0/24 Home
+    pysshmgr> scan
+    +----+----------------+--------+
+    | ID |    NETWORKS    | GROUPS |
+    +----+----------------+--------+
+    | 1  | 192.168.1.0/24 |  Home  |
+    +----+----------------+--------+
+    Choose network to scan: 	
+    
+```
+* Scan all your networks:
+
+```
+    pysshmgr> scan all
+
+```
+
+* Manage your networks:
+
+```
+    pysshmgr> addnet 192.168.1.0/24 Home
+    pysshmgr> delnet 192.168.1.0/24 Home
+    pysshmgr> networks
+    +----+----------------+--------+
+    | ID |    NETWORKS    | GROUPS |
+    +----+----------------+--------+
+    | 1  | 192.168.1.0/24 |  Home  |
+    +----+----------------+--------+
+```
+
 
  * You can list the host(s) detected:
  ```
@@ -99,11 +124,11 @@ Now you can interact with the prompt, for example:
 +----+----------------+------+-----------------------------------------------------+---------------+
 | ID |       IP       | PORT |                        FQDN                         |     GROUP     |
 +----+----------------+------+-----------------------------------------------------+---------------+
-| 1  |  10.100.208.1  |  22  |        compterhome1.domain                          | Home_network  |
+| 1  |  10.100.208.1  |  22  |        compterhome1.domain                          |     Home      |
 +----+----------------+------+-----------------------------------------------------+---------------+
-| 2  |  10.100.208.2  |  22  |        computerhome2.domain                         | Home_network  |
+| 2  |  10.100.208.2  |  22  |        computerhome2.domain                         |     Home      |
 +----+----------------+------+-----------------------------------------------------+---------------+
-| 3  |  10.100.208.3  |  22  |        computerhome3.domain                         | Home_network  |
+| 3  |  10.100.208.3  |  22  |        computerhome3.domain                         |     Home      |
 +----+----------------+------+-----------------------------------------------------+---------------+
 
  ```
@@ -120,14 +145,14 @@ Now you can interact with the prompt, for example:
  * Thank's to xpane you can open several ssh terminals with synchronization:
  
  ```
-   pysshmgr> connect comuterhome sync
+   pysshmgr> connect computerhome sync
  ```
  
  * You can delete the host(s) form list by single ID, ID range, several ID or searching for a string:
  
 ```
    pysshmgr> delete 1
-   pysshmgr> delete 1/3
+   pysshmgr> delete 1-3
    pysshmgr> delete 1,3
    pysshmgr> delete comuterhome
 ```
@@ -142,20 +167,20 @@ Now you can interact with the prompt, for example:
 
  ```
 
- * And show the values of the options:
+ * Show the values of the options:
 
  ```
-   pysshmgr> show 
-   ++++++++++++++++++++++++++++
-   +       Otions values      +
-   ++++++++++++++++++++++++++++
+   pysshmgr> options
+   ----------------------------
+   -----   Otions values  -----
+   ----------------------------
 
    [+] TCP Port: 22
    [+] User: root
    [+] Default group: default
    [+] Hosts file: hostfile.csv
    [+] Terminal: mate-terminal
-   ++++++++++++++++++++++++++++
+   ----------------------------
  ```
 
  * You can manage the terminal session, showing the PID of the process:
