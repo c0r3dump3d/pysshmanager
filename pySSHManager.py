@@ -6,7 +6,7 @@ __license__="""
 
 pySSHManager
 
-Version 0.1.5
+Version 0.2.0
 
 A simple Python3 script to manage SSH connection.
 
@@ -588,7 +588,7 @@ if __name__ == '__main__':
     # Read the configuration file
     welcome()
     print(
-        "[+] Starting pySSHManager v0.1 (https://github.com/c0r3dump3d/pysshmanager) at " +
+        "[+] Starting pySSHManager v0.2.0 (https://github.com/c0r3dump3d/pysshmanager) at " +
         time.strftime("%x") +
         " " +
         time.strftime("%X") +
