@@ -180,6 +180,7 @@ Now you can interact with the prompt, for example:
    [+] Default group: default
    [+] Hosts file: hostfile.csv
    [+] Terminal: mate-terminal
+   [+] Timeout: 0.1
    ----------------------------
  ```
 
