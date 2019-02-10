@@ -93,10 +93,10 @@ Now you can interact with the prompt, for example:
     +----+----------------+--------+
     | 1  | 192.168.1.0/24 |  Home  |
     +----+----------------+--------+
-    Choose network to scan: 	
+    Choose network to scan: 1 	
     
 ```
-* Scan all your networks:
+* Scan all networks:
 
 ```
     pysshmgr> scan all
