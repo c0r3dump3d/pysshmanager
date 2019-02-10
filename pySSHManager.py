@@ -276,7 +276,7 @@ def loadCSV():
         print(
             "[-] The " +
             hostfile +
-            " file is empty. To add some hosts run \'scan\' command.")
+            " file is empty. To add some hosts first add a network with \'addnet\' command, and then scan with \'scan\' command.")
         return
 
     with open(hostfile) as csvfile:
