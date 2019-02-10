@@ -49,6 +49,9 @@ pySSHManager has configuration file (`pySSHManager.conf`) where you can defined 
 
   #The path of CSV file to save the host(s) information
   hostfile=hostfile.csv
+
+  #Timeout for the SSH scan (seconds).
+  timeout=0.1
 ```
 How xpanes use tmux if you have not previously used tmux a good configuration tmux file (.tmux.conf) is:
 
