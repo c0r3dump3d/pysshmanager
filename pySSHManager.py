@@ -243,7 +243,7 @@ def searchConnect(term):
             hosts_found.append(hosts_present_hash[val])
 
     if not hosts_found:
-        print("[-] No result in the search.")
+        print("[-] No host(s) found.")
         return
 
     else:
@@ -499,7 +499,7 @@ def searchDelete(term):
             hosts_found.append(val)
 
     if not hosts_found:
-        print("[-] No result in the search.")
+        print("[-] No host(s) found.")
         return
 
     else:
@@ -514,20 +514,38 @@ def searchDelete(term):
 
 
 def extracNet(target):
+    global chk
     hosts[:] = []
     try:
-       for ip in IP(target):
-          hosts.append(str(ip))
+        for ip in IP(target):
+            hosts.append(str(ip))
     except ValueError:
           print("[-] Invalid network address.")
           chk = 0
+          return
     except IndexError:
           print("[-] Invalid network address.")
           chk = 0
+          return
 
     if len(hosts) > 1:
         del hosts[0]
         del hosts[-1]
+
+def checkNet(target):
+
+    print("[+] Checking network address... ", end='') 
+
+    try:
+        for ip in IP(target):
+            hosts.append(str(ip))
+    except ValueError:
+          print("Fail!!")
+          print("[-] Not valid network address.")
+          return 1
+
+    print("Ok!!")
+    return 0
 
 def yes_or_no(message):
 
@@ -540,7 +558,16 @@ def yes_or_no(message):
         elif choice in no:
             return False
         else:
+
             sys.stdout.write("Please respond with 'yes' or 'no'\n")
+
+def readCgroup():
+
+    warnings.simplefilter("ignore", ResourceWarning)
+    global group
+    config = configparser.ConfigParser()
+    config.read_file(open(r'pySSHManager.conf'))
+    group = config.get('config', 'group')
 
 def readConfig():
 
@@ -549,7 +576,6 @@ def readConfig():
     global terminal
     global port
     global user
-    global group
     global timeout
     
 
@@ -560,7 +586,6 @@ def readConfig():
     hostfile = config.get('config', 'hostfile')
     port = config.get('config', 'port')
     user = config.get('config', 'user')
-    group = config.get('config', 'group')
     timeout = config.get('config', 'timeout')
 
 
@@ -609,6 +634,7 @@ if __name__ == '__main__':
 
     print(" Ok.")
     readConfig()
+    readCgroup()
 
     print("[+] Reading for previous host(s) ...")
     loadCSV()
@@ -627,6 +653,7 @@ if __name__ == '__main__':
 
     while True:
         sync = 0
+        readCgroup()
         table = BeautifulTable(max_width=100)
         table.default_alignment = BeautifulTable.ALIGN_CENTER
         table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
@@ -666,12 +693,11 @@ if __name__ == '__main__':
                         print("[+] Updating hostfile.csv file ...")
                         os.remove('hostfile.csv')
                         writeCSV()
+                        print(
+                          "[+] Some hosts were found ... (check with \'list\' command.)")
 
-                        if check == 0:
-                            print("[-] No host added.")
-                        else:
-                            print(
-                            "[+] Some hosts were found ... (check with \'list\' command.)")
+                    else:
+                        print("[-] No host added.")
 
             else:
                 showNetworks()
@@ -679,7 +705,7 @@ if __name__ == '__main__':
                 num = num - 1
                 try:
                     target = networks[num]
-                    groups = groups[num]
+                    group = groups[num]
                     extracNet(target)
 
                     if chk != 0:
@@ -693,15 +719,14 @@ if __name__ == '__main__':
                         print("[+] Updating hostfile.csv file ...")
                         os.remove('hostfile.csv')
                         writeCSV()
+                        print(
+                          "[+] Some hosts were found ... (check with \'list\' command.)")
 
-                        if check == 0:
-                            print("[-] No host added.")
-                        else:
-                            print(
-                            "[+] Some hosts were found ... (check with \'list\' command.)")
+                    else:
+                        print("[-] No host added.")
 
                 except IndexError:
-                    print("Network number not valid.")
+                    print("Network number not found.")
                     pass 
 
         elif answer.split(" ")[0] == "list":
@@ -712,21 +737,45 @@ if __name__ == '__main__':
     
             try:
                 if "/" not in answer.split(" ")[1]:
-                    networks.append(answer.split(" ")[1]+"/32")
+
+                    test=checkNet(answer.split(" ")[1])
+                    if test == 0:
+                        if ((answer.split(" ")[1]+"/32")) not in networks:
+                            networks.append(answer.split(" ")[1]+"/32")
+                            try:
+                                groups.append(answer.split(" ")[2])
+                                group = answer.split(" ")[2]
+
+                            except IndexError:
+
+                                groups.append(group)
+                                pass
+                        else:
+                            print("We have seen this network before!")
+                    else:
+                        pass
                 
                 else:
-                    networks.append(answer.split(" ")[1])
+
+                    test=checkNet(answer.split(" ")[1])
+                    if test == 0:
+                        if (answer.split(" ")[1]) not in networks:
+                            networks.append(answer.split(" ")[1])
+                            try:
+                                groups.append(answer.split(" ")[2])
+                                group = answer.split(" ")[2]
+
+                            except IndexError:
+
+                                groups.append(group)
+                                pass
+                        else:
+                            print("We have seen this network before!")
+                    else:
+                        pass
 
             except IndexError:
                 print("Please, you need to especified a network CIDR.")
-                pass
-
-            try:
-                groups.append(answer.split(" ")[2])
-                group = answer.split(" ")[2]
-
-            except IndexError:
-                groups.append(group)
                 pass
 
         elif answer.split(" ")[0] == "delnet":
@@ -893,6 +942,8 @@ if __name__ == '__main__':
                 hosts_id_hash = {}
                 hosts_net_hash = {}
                 hosts_group_hash = {}
+                networks[:] = []
+                groups[:] = []
                 loadCSV()
             else:
                 pass
@@ -917,6 +968,7 @@ if __name__ == '__main__':
 
             elif answer.split(" ")[1] == "default":
                 readConfig()
+                readCgroup()
 
             else:
                 print("[-] Option not defined.")
