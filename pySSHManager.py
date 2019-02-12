@@ -143,10 +143,10 @@ def help():
             """)
 
 def searchALL(term):
-    table = BeautifulTable(max_width=100)
+    table = BeautifulTable(max_width=150)
     table.default_alignment = BeautifulTable.ALIGN_CENTER
     table.column_headers = ["ID", "IP", "PORT", "FQDN", "NETWORK", "GROUP"]
-    table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
+    table.width_exceed_policy = BeautifulTable.WEP_WRAP
     for val in hosts_id_hash:
 
         if term in hosts_present_hash[val]:
@@ -258,9 +258,9 @@ def searchConnect(term):
 
 
 def showHOSTS():
-    table = BeautifulTable(max_width=100)
+    table = BeautifulTable(max_width=150)
     table.default_alignment = BeautifulTable.ALIGN_CENTER
-    table.width_exceed_policy = BeautifulTable.WEP_ELLIPSIS
+    table.width_exceed_policy = BeautifulTable.WEP_WRAP
     table.column_headers = ["ID", "IP", "PORT", "FQDN", "NETWORK", "GROUP"]
     for i in hosts_present_hash:
         table.append_row([hosts_id_hash[i], str(hosts_present_hash[i]), str(
@@ -1013,8 +1013,6 @@ if __name__ == '__main__':
             print("[+] Updating hostfile.csv file ...")
             os.remove('hostfile.csv')
             writeCSV()
-
-            killAll()
 
             print("[+] Have a nice day !!")
             exit(0)
