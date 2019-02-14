@@ -215,7 +215,7 @@ Now you can interact with the prompt, for example:
 
  ```
    pysshmgr> save 
-   pysshmgr> exit (Will kill all the terminal sessions) 
+   pysshmgr> exit 
  ```
 
  * You can reset the list of host(s) with `reset` command:  
