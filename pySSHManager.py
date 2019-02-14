@@ -569,6 +569,39 @@ def readCgroup():
     config.read_file(open(r'pySSHManager.conf'))
     group = config.get('config', 'group')
 
+def checKS():
+    global xpan
+    terms = ['konsole','termite','xterm',
+            'mate-terminal', 'gnome-terminal',
+            'terminator']
+
+    print("[+] Checking if xpanes is present in the system...", end='')
+    try:
+        xpan = (str(check_output(["/usr/bin/which",
+                                     "xpanes"],
+                                     universal_newlines=True,
+                                     stderr=subprocess.PIPE))).split("\n")[0]
+        print(" Ok!!")
+
+    except subprocess.CalledProcessError:
+
+         print()
+         print("[-] Unable to find xpanes. You need to install xpanes (https://github.com/greymd/tmux-xpanes/wiki/Installation).")
+         exit(1)
+
+    for termis in terms:
+
+        print("[+] Checking if " + termis + " terminal it's present in the system...", end='')
+        try:
+            check_output(["/usr/bin/which",
+                            termis],
+                            universal_newlines=True,
+                                     stderr=subprocess.PIPE)
+            print(" Present!!")
+
+        except subprocess.CalledProcessError:
+            print (" NOT present.")
+
 def readConfig():
 
     warnings.simplefilter("ignore", ResourceWarning)
@@ -619,20 +652,8 @@ if __name__ == '__main__':
         time.strftime("%X") +
         " - for legal purposes only.")
     print()
-
-    print("[+] Checking if xpanes is present ...", end='')
-    try:
-         xpan = (str(check_output(["/usr/bin/which",
-                                     "xpanes"],
-                                     universal_newlines=True,
-                                     stderr=subprocess.PIPE))).split("\n")[0]
-
-    except subprocess.CalledProcessError:
-
-         print("[-] Unable to find xpanes. You need to install xpanes (https://github.com/greymd/tmux-xpanes/wiki/Installation).")
-         exit(1)
-
-    print(" Ok.")
+    
+    checKS()
     readConfig()
     readCgroup()
 
