@@ -450,9 +450,9 @@ def showNetworks():
     print(table) 
 
 def delNetwork(netk):
-    j = networks.index(netk)
-    del networks[j]
-    del groups[j]
+
+    del networks[netk]
+    del groups[netk]
 
 
 def searchDelete(term):
@@ -747,7 +747,7 @@ if __name__ == '__main__':
                         print("[-] No host added.")
 
                 except IndexError:
-                    print("Network number not found.")
+                    print("[-] Network number not found.")
                     pass 
 
         elif answer.split(" ")[0] == "list":
@@ -772,7 +772,7 @@ if __name__ == '__main__':
                                 groups.append(group)
                                 pass
                         else:
-                            print("We have seen this network before!")
+                            print("[-] We have seen this network before!")
                     else:
                         pass
                 
@@ -801,19 +801,16 @@ if __name__ == '__main__':
 
         elif answer.split(" ")[0] == "delnet":
 
-            try: 
-                delNetwork(answer.split(" ")[1])
-                searchDelete(answer.split(" ")[1])
+            showNetworks()
+            num = int(input("Choose network to delete: "))
+            num = num - 1
 
-            except ValueError:
-
-                print("[-] Network not found.")
-                pass
+            try:
+                searchDelete(networks[num])
+                delNetwork(num)
 
             except IndexError:
-
-                print("[-] Delete a network.")
-                pass
+                print("[-] Invalid network number")
 
         elif answer.split(" ")[0] == "search":
             term = answer.split(" ")[1]
