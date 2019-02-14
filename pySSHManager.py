@@ -791,12 +791,12 @@ if __name__ == '__main__':
                                 groups.append(group)
                                 pass
                         else:
-                            print("We have seen this network before!")
+                            print("[-] We have seen this network before!")
                     else:
                         pass
 
             except IndexError:
-                print("Please, you need to especified a network CIDR.")
+                print("[-] Please, you need to especified a network CIDR.")
                 pass
 
         elif answer.split(" ")[0] == "delnet":
@@ -806,7 +806,13 @@ if __name__ == '__main__':
                 searchDelete(answer.split(" ")[1])
 
             except ValueError:
-                print("Network not found.")
+
+                print("[-] Network not found.")
+                pass
+
+            except IndexError:
+
+                print("[-] Delete a network.")
                 pass
 
         elif answer.split(" ")[0] == "search":
