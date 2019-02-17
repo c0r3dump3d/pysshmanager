@@ -52,28 +52,28 @@ try:
     from prompt_toolkit.completion import WordCompleter
 
 except ImportError:
-    print("You need to install Python Prompt Toolkit module. pip install prompt_toolkit")
+    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to install Python Prompt Toolkit module. pip install prompt_toolkit")
     exit(1)
 
 try:
     from beautifultable import BeautifulTable
 
 except ImportError:
-    print("You need to install Beautiful Table python  module. pip install beautifultable")
+    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to install Beautiful Table python  module. pip install beautifultable")
     exit(1)
 
 try:
     import configparser
 
 except ImportError:
-    print("You need to install configparser python  module. pip install configparser")
+    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to install configparser python  module. pip install configparser")
     exit(1)
 
 try:
     import psutil 
 
 except ImportError:
-    print("You need to install psutil python  module. pip install psutil")
+    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to install psutil python  module. pip install psutil")
     exit(1)
 
 from subprocess import DEVNULL
@@ -83,7 +83,7 @@ import warnings
 try:
     from IPy import IP
 except ImportError:
-    print("You need to install IPy module. pip install IPy.")
+    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to install IPy module. pip install IPy.")
     exit(1)
 
 
@@ -103,7 +103,7 @@ def welcome():
     print()
 
 def help():
-    print("[+] Available commands: ")
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Available commands: ")
     print()
     print("[*] scan: Scan a single Ip or Network -- scan 192.168.14, scan 192.168.1.0/24")
     print("[*] list: List available host(s).")
@@ -141,6 +141,12 @@ def help():
                 -- several ID: delete $ID(1),$ID(3)
                 -- search and connect by string: connect "string" 
             """)
+
+class bcolors:
+
+    OKGREEN = '\033[92m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
 
 def searchALL(term):
     table = BeautifulTable(max_width=150)
@@ -191,12 +197,12 @@ def showValues():
     print("-----  Options values  -----")
     print("----------------------------")
     print()
-    print("[+] TCP Port: {0}".format(port))
-    print("[+] User: {0}".format(user))
-    print("[+] Default group: {0}".format(group))
-    print("[+] Hosts file: {0}".format(hostfile))
-    print("[+] Terminal: {0}".format(terminal))
-    print("[+] Timeout: {0}".format(timeout))
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] TCP Port: {0}".format(port))
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] User: {0}".format(user))
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Default group: {0}".format(group))
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Hosts file: {0}".format(hostfile))
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Terminal: {0}".format(terminal))
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Timeout: {0}".format(timeout))
     print("----------------------------")
 
 def searchConnect(term):
@@ -243,7 +249,7 @@ def searchConnect(term):
             hosts_found.append(hosts_present_hash[val])
 
     if not hosts_found:
-        print("[-] No host(s) found.")
+        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host(s) found.")
         return
 
     else:
@@ -274,7 +280,7 @@ def loadCSV():
         open(hostfile, 'w+').close()
     if os.stat(hostfile).st_size == 0:
         print(
-            "[-] The " +
+            "[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] The " +
             hostfile +
             " file is empty. To add some hosts first add a network with \'addnet\' command, and then scan with \'scan\' command.")
         return
@@ -311,19 +317,22 @@ def writeCSV():
 def killProc(pid):
      
     if str(pid) in process:
-        print("[+] Killing terminal session with PID " + str(pid))
+        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Killing terminal session with PID " + str(pid))
         p = psutil.Process(int(pid))
         for child in p.children(recursive=True):
-            try:
-                child.kill()
-            except:
-                pass
-            try:
-                p.kill()
-            except:
-                pass
+            if child.status() == psutil.STATUS_ZOMBIE:
+                print ("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] The process " + child + " it's zombie.")
+            else:
+                try:
+                    child.kill()
+                except:
+                    pass
+                try:
+                    p.kill()
+                except:
+                    pass
     else:
-        print("[-] This process doesn't exist.")
+        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] This process doesn't exist.")
 
 def killAll():
 
@@ -339,7 +348,7 @@ def listProcs():
     print("----------------------------------------")
     print()
     for i in process:
-        print ("[+] " + str(i))
+        print ("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] " + str(i))
 
 def connScan(hosts, port, group, net):
     warnings.simplefilter("ignore", ResourceWarning)
@@ -350,7 +359,7 @@ def connScan(hosts, port, group, net):
     except IndexError:
         id = 0
     check = 0
-    print("[+] Scanning %d host(s) ..." % numhost)
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scanning %d host(s) ..." % numhost)
     with ProgressBar() as pb:
         for ip in pb(hosts):
             hash_object = hashlib.sha256(ip.encode('utf-8'))
@@ -360,7 +369,7 @@ def connScan(hosts, port, group, net):
             try:
                 result = connSkt.connect_ex((ip, int(port)))
             except BaseException:
-                print("[-] Unable to connect.")
+                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Unable to connect.")
                 break
             if result == 0:
                 if hash_ip not in hosts_present_hash:
@@ -410,7 +419,7 @@ def connection(hosts_connect):
                                       universal_newlines=True,
                                       stderr=subprocess.PIPE))).split("\n")[0]
         except subprocess.CalledProcessError:
-            print("[-] Unable to open the terminal. Please the terminal application.")
+            print("[✗] Unable to open the terminal. Please the terminal application.")
             return
 
         if sync == 1:
@@ -422,11 +431,11 @@ def connection(hosts_connect):
     
     try:
         proc = subprocess.Popen(command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
-        print("[+] Open terminal with PID " + str(proc.pid))
+        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Open terminal with PID " + str(proc.pid))
         process.append(str(proc.pid))
 
     except BaseException as e:
-        print("[-] Unable to connect: {0}".format(e))
+        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Unable to connect: {0}".format(e))
 
 
 def deleteHosts(hosts_delete):
@@ -499,7 +508,7 @@ def searchDelete(term):
             hosts_found.append(val)
 
     if not hosts_found:
-        print("[-] No host(s) found.")
+        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host(s) found.")
         return
 
     else:
@@ -520,11 +529,11 @@ def extracNet(target):
         for ip in IP(target):
             hosts.append(str(ip))
     except ValueError:
-          print("[-] Invalid network address.")
+          print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Invalid network address.")
           chk = 0
           return
     except IndexError:
-          print("[-] Invalid network address.")
+          print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Invalid network address.")
           chk = 0
           return
 
@@ -534,14 +543,14 @@ def extracNet(target):
 
 def checkNet(target):
 
-    print("[+] Checking network address... ", end='') 
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Checking network address... ", end='') 
 
     try:
         for ip in IP(target):
             hosts.append(str(ip))
     except ValueError:
           print("Fail!!")
-          print("[-] Not valid network address.")
+          print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Not valid network address.")
           return 1
 
     print("Ok!!")
@@ -559,7 +568,7 @@ def yes_or_no(message):
             return False
         else:
 
-            sys.stdout.write("Please respond with 'yes' or 'no'\n")
+            sys.stdout.write("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Please respond with 'yes' or 'no'\n")
 
 def readCgroup():
 
@@ -575,7 +584,8 @@ def checKS():
             'mate-terminal', 'gnome-terminal',
             'terminator']
 
-    print("[+] Checking if xpanes is present in the system...", end='')
+
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Checking if xpanes is present in the system...", end='')
     try:
         xpan = (str(check_output(["/usr/bin/which",
                                      "xpanes"],
@@ -586,21 +596,21 @@ def checKS():
     except subprocess.CalledProcessError:
 
          print()
-         print("[-] Unable to find xpanes. You need to install xpanes (https://github.com/greymd/tmux-xpanes/wiki/Installation).")
+         print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Unable to find xpanes. You need to install xpanes (https://github.com/greymd/tmux-xpanes/wiki/Installation).")
          exit(1)
 
     for termis in terms:
 
-        print("[+] Checking if " + termis + " terminal it's present in the system...", end='')
+        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Checking if " + termis + " terminal it's present in the system...", end='')
         try:
             check_output(["/usr/bin/which",
                             termis],
                             universal_newlines=True,
                                      stderr=subprocess.PIPE)
-            print(" Present!!")
+            print(" " + bcolors.OKGREEN + "Present!!" + bcolors.ENDC)
 
         except subprocess.CalledProcessError:
-            print (" NOT present.")
+            print (" " + bcolors.FAIL + "NOT present." + bcolors.ENDC)
 
 def readConfig():
 
@@ -611,8 +621,7 @@ def readConfig():
     global user
     global timeout
     
-
-    print("[+] Reading the config file ...")
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Reading the config file ...")
     config = configparser.ConfigParser()
     config.read_file(open(r'pySSHManager.conf'))
     terminal = config.get('config', 'terminal')
@@ -646,7 +655,7 @@ if __name__ == '__main__':
     # Read the configuration file
     welcome()
     print(
-        "[+] Starting pySSHManager v0.2.0 (https://github.com/c0r3dump3d/pysshmanager) at " +
+        "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Starting pySSHManager v0.2.0 (https://github.com/c0r3dump3d/pysshmanager) at " +
         time.strftime("%x") +
         " " +
         time.strftime("%X") +
@@ -657,7 +666,7 @@ if __name__ == '__main__':
     readConfig()
     readCgroup()
 
-    print("[+] Reading for previous host(s) ...")
+    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Reading for previous host(s) ...")
     loadCSV()
 
     for ip in hosts_net_hash:
@@ -699,7 +708,7 @@ if __name__ == '__main__':
                 hosts_group_hash = {}
                 for k in networks:
                     target = k
-                    print("[+] Scanning network " + target)
+                    print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scanning network " + target)
                     group = groups[k2]
                     k2 = k2 + 1
                     extracNet(target)
@@ -707,18 +716,18 @@ if __name__ == '__main__':
                         start_time = time.time()
                         check = connScan(hosts, port, group, target)
                         print(
-                            "[+] Scan finished in",
+                            "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scan finished in",
                             time.time() -
                             start_time,
                             "seconds.")
-                        print("[+] Updating hostfile.csv file ...")
+                        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
                         os.remove('hostfile.csv')
                         writeCSV()
                         print(
-                          "[+] Some hosts were found ... (check with \'list\' command.)")
+                          "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
 
                     else:
-                        print("[-] No host added.")
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
 
             else:
                 showNetworks()
@@ -733,21 +742,21 @@ if __name__ == '__main__':
                         start_time = time.time()
                         check = connScan(hosts, port, group,target)
                         print(
-                            "[+] Scan finished in",
+                            "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scan finished in",
                             time.time() -
                             start_time,
                             "seconds.")
-                        print("[+] Updating hostfile.csv file ...")
+                        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
                         os.remove('hostfile.csv')
                         writeCSV()
                         print(
-                          "[+] Some hosts were found ... (check with \'list\' command.)")
+                          "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
 
                     else:
-                        print("[-] No host added.")
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
 
                 except IndexError:
-                    print("[-] Network number not found.")
+                    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Network number not found.")
                     pass 
 
         elif answer.split(" ")[0] == "list":
@@ -772,7 +781,7 @@ if __name__ == '__main__':
                                 groups.append(group)
                                 pass
                         else:
-                            print("[-] We have seen this network before!")
+                            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] We have seen this network before!")
                     else:
                         pass
                 
@@ -791,12 +800,12 @@ if __name__ == '__main__':
                                 groups.append(group)
                                 pass
                         else:
-                            print("[-] We have seen this network before!")
+                            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] We have seen this network before!")
                     else:
                         pass
 
             except IndexError:
-                print("[-] Please, you need to especified a network CIDR.")
+                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Please, you need to especified a network CIDR.")
                 pass
 
         elif answer.split(" ")[0] == "delnet":
@@ -810,7 +819,7 @@ if __name__ == '__main__':
                 delNetwork(num)
 
             except IndexError:
-                print("[-] Invalid network number")
+                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Invalid network number")
 
         elif answer.split(" ")[0] == "search":
             term = answer.split(" ")[1]
@@ -818,141 +827,191 @@ if __name__ == '__main__':
 
         elif answer.split(" ")[0] == "connect":
 
-            if answer.split(" ")[1]:
+            lastkey = list(hosts_id_hash.items())
+            id = int(lastkey[-1][1])
+
+            try:
 
                 string = answer.split(" ")[1]
+                hosts_connect = []
+
+                if "-" in string:
+                    try:
+                        value1 = int(string.split("-")[0])
+                        value2 = int(string.split("-")[1])
+                    
+                        if value1 <= int(id) and value2 <= int(id):
+                            for i in list(range(value1, value2 + 1)):
+                                for j in hosts_id_hash:
+                                    if str(hosts_id_hash[j]) == str(i):
+                                        ip = hosts_present_hash[j]
+                                        hosts_connect.append(ip)
+                                        table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
+                                            hosts_port_hash[j]), str(hosts_dns_hash[j]),
+                                            str(hosts_net_hash[j]),str(hosts_group_hash[j])])
+                                        break
+                            print(table)
+                            message = "Are you sure to connect to this host(s)? (Y/n) "
+                            action = yes_or_no(message)
+                            if action:
+                                connection(hosts_connect)
+                                del table
+                            else:
+                                pass
+
+                        else:
+                            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Out of range.")
+
+                    except ValueError:
+
+                            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Value error.")
+
+                elif "," in string:
+                    lst = string.split(",")
+                    stringcount = len(lst)
+                    for value1 in lst:
+                        try:
+                            if int(value1) <= int(id):
+                                for j in hosts_id_hash:
+                                    if str(hosts_id_hash[j]) == str(value1):
+                                        ip = hosts_present_hash[j]
+                                        hosts_connect.append(ip)
+                                        table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
+                                            hosts_port_hash[j]), str(hosts_dns_hash[j]),
+                                            str(hosts_net_hash[j]), str(hosts_group_hash[j])])
+                                        break
+                            else:
+                                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] The host " + value1 + " doesn't exist.")
+
+                        except ValueError:
+                            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Value error.")
+
+                    print(table)
+                    message = "Are you sure to connect to this host(s)? (Y/n) "
+                    action = yes_or_no(message)
+
+                    if action:
+                        connection(hosts_connect)
+                        del table
+
+                    else:
+                        pass
+
+                elif string.isdigit():
+                    lastkey = list(hosts_id_hash.items())
+                    id = int(lastkey[-1][1])
+                    if int(string) <= int(id):
+                        for j in hosts_id_hash:
+                            if str(hosts_id_hash[j]) == str(string):
+                                ip = hosts_present_hash[j]
+                                hosts_connect.append(ip)
+                                table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
+                                    hosts_port_hash[j]), str(hosts_dns_hash[j]), str(hosts_net_hash[j]), str(hosts_group_hash[j])])
+                                break
+
+                        print(table)
+                        message = "Are you sure to connect to this host(s)? (Y/n) "
+                        action = yes_or_no(message)
+                        if action:
+                            connection(hosts_connect)
+                            del table
+                        else:
+                            pass
+                    else:
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] This hosts doesn't exist.")
+
+                else:
+                    searchConnect(string)
+
+            except IndexError:
+
+                print ("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to specified something ...") 
+                pass 
 
                 try:
                     if answer.split(" ")[2] == "sync":
                         sync = 1
                 except BaseException:
                     pass
-            else:
-                print("[+] Connect to ...?")
-                pass 
-
-            hosts_connect = []
-            if "-" in string:
-                value1 = int(string.split("-")[0])
-                value2 = int(string.split("-")[1])
-
-                for i in list(range(value1, value2 + 1)):
-                    for j in hosts_id_hash:
-                        if str(hosts_id_hash[j]) == str(i):
-                            ip = hosts_present_hash[j]
-                            hosts_connect.append(ip)
-                            table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
-                                hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_net_hash[j]),str(hosts_group_hash[j])])
-                            break
-                print(table)
-                message = "Are you sure to connect to this host(s)? (Y/n) "
-                action = yes_or_no(message)
-                if action:
-                    connection(hosts_connect)
-                    del table
-                else:
-                    pass
-
-            elif "," in string:
-                lst = string.split(",")
-                stringcount = len(lst)
-                for value1 in lst:
-                    for j in hosts_id_hash:
-                        if str(hosts_id_hash[j]) == str(value1):
-                            ip = hosts_present_hash[j]
-                            hosts_connect.append(ip)
-                            table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
-                                hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_net_hash[j]), str(hosts_group_hash[j])])
-                            break
-                print(table)
-                message = "Are you sure to connect to this host(s)? (Y/n) "
-                action = yes_or_no(message)
-                if action:
-                    connection(hosts_connect)
-                    del table
-                else:
-                    pass
-
-            elif string.isdigit():
-                for j in hosts_id_hash:
-                    if str(hosts_id_hash[j]) == str(string):
-                        ip = hosts_present_hash[j]
-                        hosts_connect.append(ip)
-                        table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
-                            hosts_port_hash[j]), str(hosts_dns_hash[j]), str(hosts_net_hash[j]), str(hosts_group_hash[j])])
-                        break
-
-                print(table)
-                message = "Are you sure to connect to this host(s)? (Y/n) "
-                action = yes_or_no(message)
-                if action:
-                    connection(hosts_connect)
-                    del table
-                else:
-                    pass
-
-            else:
-                searchConnect(string)
 
         elif answer.split(" ")[0] == "delete":
+            lastkey = list(hosts_id_hash.items())
+            id = int(lastkey[-1][1])
             string = answer.split(" ")[1]
             hosts_delete=[]
             if "-" in string:
-                value1 = int(string.split("-")[0])
-                value2 = int(string.split("-")[1])
+                try:
+                    value1 = int(string.split("-")[0])
+                    value2 = int(string.split("-")[1])
 
-                for i in list(range(value1, value2 + 1)):
-                    for j in hosts_id_hash:
-                        if str(hosts_id_hash[j]) == str(i):
-                            table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
-                                hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_net_hash[j]), str(hosts_group_hash[j])])
-                            hosts_delete.append(j)
-                            break
+                    if value1 <= int(id) and value2 <= int(id):
 
-                print(table)
-                message = "Are you sure to delete this host(s)? (Y/n) "
-                action = yes_or_no(message)
-                if action:
-                     deleteHosts(hosts_delete)
-                     del table
+                        for i in list(range(value1, value2 + 1)):
+                            for j in hosts_id_hash:
+                                if str(hosts_id_hash[j]) == str(i):
+                                    table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
+                                        hosts_port_hash[j]), str(hosts_dns_hash[j]),
+                                        str(hosts_net_hash[j]), str(hosts_group_hash[j])])
+                                    hosts_delete.append(j)
+                                    break
+
+                        print(table)
+                        message = "Are you sure to delete this host(s)? (Y/n) "
+                        action = yes_or_no(message)
+                        if action:
+                            deleteHosts(hosts_delete)
+                            del table
+
+                    else:
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Out of range.")
+
+                except ValueError:
+
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Error value.")
 
             elif "," in string:
                 lst = string.split(",")
                 stringcount = len(lst)
                 for value1 in lst:
-                    for j in hosts_id_hash:
-                        if str(hosts_id_hash[j]) == str(value1):
-                            table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
-                                hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                                str(hosts_net_hash[j]), str(hosts_group_hash[j])])
-                            hosts_delete.append(j)
-                            break
+                    if value1 <= int(id):
+                        for j in hosts_id_hash:
+                            if str(hosts_id_hash[j]) == str(value1):
+                                table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
+                                    hosts_port_hash[j]), str(hosts_dns_hash[j]),
+                                    str(hosts_net_hash[j]), str(hosts_group_hash[j])])
+                                hosts_delete.append(j)
+                                break
 
-                print(table)
-                message = "Are you sure to delete this host(s)? (Y/n) "
-                action = yes_or_no(message)
-                if action:
-                    deleteHosts(hosts_delete)
-                    del table
+                    print(table)
+                    message = "Are you sure to delete this host(s)? (Y/n) "
+                    action = yes_or_no(message)
+                    if action:
+                        deleteHosts(hosts_delete)
+                        del table
+
+                    else:
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] This hosts doesn't exist.")
 
             elif string.isdigit():
-                for j in hosts_id_hash:
-                    if str(hosts_id_hash[j]) == str(string):
-                        table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
-                             hosts_port_hash[j]), str(hosts_dns_hash[j]),
-                             str(hosts_net_hash[j]),str(hosts_group_hash[j])])
-                        hosts_delete.append(j)
-                        break
-                print(table)
-                message = "Are you sure to delete this host(s)? (Y/n) "
-                action = yes_or_no(message)
-                if action:
-                    deleteHosts(hosts_delete)
-                    del table
+
+                if int(string) <= int(id):
+                    for j in hosts_id_hash:
+                        if str(hosts_id_hash[j]) == str(string):
+                            table.append_row([hosts_id_hash[j], str(hosts_present_hash[j]), str(
+                                hosts_port_hash[j]), str(hosts_dns_hash[j]),
+                                str(hosts_net_hash[j]),str(hosts_group_hash[j])])
+                            hosts_delete.append(j)
+                            break
+                    print(table)
+                    message = "Are you sure to delete this host(s)? (Y/n) "
+                    action = yes_or_no(message)
+                    if action:
+                        deleteHosts(hosts_delete)
+                        del table
             
+                else:
+                    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] This hosts doesn't exist.")
+
             else:
                 searchDelete(string)
 
@@ -976,26 +1035,26 @@ if __name__ == '__main__':
 
             if answer.split(" ")[1] == "port":
                 port = answer.split(" ")[2] 
-                print("[+] Port defined to vale {0}".format(port))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Port defined to vale {0}".format(port))
 
             elif answer.split(" ")[1] == "user":
                 user = answer.split(" ")[2] 
-                print("[+] User defined to vale {0}".format(user))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] User defined to vale {0}".format(user))
 
             elif answer.split(" ")[1] == "terminal":
                 terminal = answer.split(" ")[2] 
-                print("[+] Terminal defined to vale {0}".format(terminal))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Terminal defined to vale {0}".format(terminal))
 
             elif answer.split(" ")[1] == "group":
                 group = answer.split(" ")[2] 
-                print("[+] Default group defined to vale {0}".format(group))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Default group defined to vale {0}".format(group))
 
             elif answer.split(" ")[1] == "default":
                 readConfig()
                 readCgroup()
 
             else:
-                print("[-] Option not defined.")
+                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Option not defined.")
 
 
         elif answer.split(" ")[0] == "kill":
@@ -1008,7 +1067,7 @@ if __name__ == '__main__':
                 killProc(pid)
 
             else:
-                print("[-] Command not found.")
+                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Command not found.")
 
 
 
@@ -1028,22 +1087,22 @@ if __name__ == '__main__':
             showNetworks()
 
         elif answer.split(" ")[0] == "save":
-            print("[+] Updating hostfile.csv file ...")
+            print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
             os.remove('hostfile.csv')
             writeCSV()
 
         elif answer.split(" ")[0] == "exit":
 
-            print("[+] Updating hostfile.csv file ...")
+            print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
             os.remove('hostfile.csv')
             writeCSV()
 
-            print("[+] Have a nice day !!")
+            print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Have a nice day !!")
             exit(0)
 
         elif answer.split(" ")[0] == "":
             pass
 
         else:
-            print("[-] Command not found.")
+            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Command not found.")
 
