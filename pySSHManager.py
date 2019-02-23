@@ -518,6 +518,21 @@ def delNetwork(netk):
     del groups[netk]
 
 
+def delHostGroup(term):
+    hosts_found = []
+    for val in hosts_id_hash:
+        if term in hosts_group_hash[val]:
+            hosts_found.append(val)
+
+
+    if not hosts_found:
+        return
+
+    else:
+        deleteHosts(hosts_found)
+
+
+
 def searchDelete(term):
     hosts_found = []
     table = BeautifulTable(max_width=100)
@@ -750,6 +765,7 @@ if __name__ == '__main__':
                     target = k
                     print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scanning network " + target)
                     group = groups[k2]
+                    delHostGroup(group)
                     k2 = k2 + 1
                     extracNet(target)
                     if chk != 0:
@@ -777,6 +793,7 @@ if __name__ == '__main__':
                     try:
                         target = networks[num]
                         group = groups[num]
+                        delHostGroup(group)
                         extracNet(target)
 
                         if chk != 0:
