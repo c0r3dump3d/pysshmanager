@@ -42,7 +42,8 @@ import hashlib
 import string
 import warnings
 import signal
-import psutil
+import ipaddress
+
 
 try:
     from prompt_toolkit import PromptSession
@@ -98,7 +99,7 @@ def welcome():
 
     """)
     print()
-    print("\t.... Manage your SSH connection with Python ....")
+    print("\t.... Manage your SSH connections with Python ....")
     print()
     print()
 
@@ -141,6 +142,21 @@ def help():
                 -- several ID: delete $ID(1),$ID(3)
                 -- search and connect by string: connect "string" 
             """)
+
+
+def yes_or_no(message):
+
+    while True:
+        yes = {'yes', 'y', 'ye', ''}
+        no = {'no', 'n'}
+        choice = input(message).lower()
+        if choice in yes:
+            return True
+        elif choice in no:
+            return False
+        else:
+
+            sys.stdout.write("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Please respond with 'yes' or 'no'\n")
 
 class bcolors:
 
@@ -283,6 +299,8 @@ def loadCSV():
             "[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] The " +
             hostfile +
             " file is empty. To add some hosts first add a network with \'addnet\' command, and then scan with \'scan\' command.")
+
+        netInterface()
         return
 
     with open(hostfile) as csvfile:
@@ -338,8 +356,44 @@ def killAll():
 
     for sess in process:
         killProc(sess)
-
     del process[:]
+
+def validIPV4(address):
+
+    try:
+        socket.inet_pton(socket.AF_INET, address)
+    except AttributeError:  # no inet_pton here, sorry
+        try:
+            socket.inet_aton(address)
+        except socket.error: 
+            return False 
+        return address.count('.') == 3 
+    except socket.error:  # not a valid address 
+        return False 
+    return True
+ 
+def netInterface():
+
+    for nic, addrs in psutil.net_if_addrs().items():
+        for addr in addrs:
+            if validIPV4(addr.address):
+                if addr.address !='127.0.0.1':
+                    if addr.netmask:
+                        net = str(ipaddress.ip_network(addr.address + "/" + addr.netmask, strict=False))
+                        print ("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Network detected " + net + "... ", end='') 
+                        message="Do you want to add this network (Y/n)? "
+                        action = yes_or_no(message)
+
+                        if action:
+                            grp=input("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Please assign a name for this network [default]: ")
+                            if grp:
+                                networks.append(net)
+                                groups.append(grp)
+
+                            else:
+
+                                networks.append(net)
+                                groups.append(group)
 
 def listProcs():
     
@@ -407,7 +461,6 @@ def connection(hosts_connect):
         if sync == 1:
             command = termi + " -q -e \'" + xpan + " -c \"ssh -p " + \
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
-            print(command)
         else:
             command = termi + " -q -e \'" + xpan + " -d -c \"ssh -p " + \
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
@@ -462,6 +515,21 @@ def delNetwork(netk):
 
     del networks[netk]
     del groups[netk]
+
+
+def delHostGroup(term):
+    hosts_found = []
+    for val in hosts_id_hash:
+        if term in hosts_group_hash[val]:
+            hosts_found.append(val)
+
+
+    if not hosts_found:
+        return
+
+    else:
+        deleteHosts(hosts_found)
+
 
 
 def searchDelete(term):
@@ -556,20 +624,6 @@ def checkNet(target):
     print("Ok!!")
     return 0
 
-def yes_or_no(message):
-
-    while True:
-        yes = {'yes', 'y', 'ye', ''}
-        no = {'no', 'n'}
-        choice = input(message).lower()
-        if choice in yes:
-            return True
-        elif choice in no:
-            return False
-        else:
-
-            sys.stdout.write("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Please respond with 'yes' or 'no'\n")
-
 def readCgroup():
 
     warnings.simplefilter("ignore", ResourceWarning)
@@ -607,7 +661,7 @@ def checKS():
                             termis],
                             universal_newlines=True,
                                      stderr=subprocess.PIPE)
-            print(" " + bcolors.OKGREEN + "Present!!" + bcolors.ENDC)
+            print(" " + bcolors.OKGREEN + "Ok!" + bcolors.ENDC)
 
         except subprocess.CalledProcessError:
             print (" " + bcolors.FAIL + "NOT present." + bcolors.ENDC)
@@ -710,6 +764,7 @@ if __name__ == '__main__':
                     target = k
                     print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scanning network " + target)
                     group = groups[k2]
+                    delHostGroup(group)
                     k2 = k2 + 1
                     extracNet(target)
                     if chk != 0:
@@ -731,33 +786,38 @@ if __name__ == '__main__':
 
             else:
                 showNetworks()
-                num = int(input("Choose network to scan: "))
-                num = num - 1
                 try:
-                    target = networks[num]
-                    group = groups[num]
-                    extracNet(target)
+                    num = int(input("Choose network to scan: "))
+                    num = num - 1
+                    try:
+                        target = networks[num]
+                        group = groups[num]
+                        delHostGroup(group)
+                        extracNet(target)
 
-                    if chk != 0:
-                        start_time = time.time()
-                        check = connScan(hosts, port, group,target)
-                        print(
-                            "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scan finished in",
-                            time.time() -
-                            start_time,
-                            "seconds.")
-                        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
-                        os.remove('hostfile.csv')
-                        writeCSV()
-                        print(
-                          "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
+                        if chk != 0:
+                            start_time = time.time()
+                            check = connScan(hosts, port, group,target)
+                            print(
+                                "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scan finished in",
+                                time.time() -
+                                start_time,
+                                "seconds.")
+                            print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
+                            os.remove('hostfile.csv')
+                            writeCSV()
+                            print(
+                            "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
 
-                    else:
-                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
+                        else:
+                            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
 
-                except IndexError:
-                    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Network number not found.")
-                    pass 
+                    except IndexError:
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Network number not found.")
+
+                except ValueError:
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Network number not found.")
+
 
         elif answer.split(" ")[0] == "list":
 
@@ -834,6 +894,11 @@ if __name__ == '__main__':
 
                 string = answer.split(" ")[1]
                 hosts_connect = []
+                try:
+                    if answer.split(" ")[2] == "sync":
+                        sync = 1
+                except BaseException:
+                    pass
 
                 if "-" in string:
                     try:
@@ -927,12 +992,6 @@ if __name__ == '__main__':
 
                 print ("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to specified something ...") 
                 pass 
-
-                try:
-                    if answer.split(" ")[2] == "sync":
-                        sync = 1
-                except BaseException:
-                    pass
 
         elif answer.split(" ")[0] == "delete":
             lastkey = list(hosts_id_hash.items())
