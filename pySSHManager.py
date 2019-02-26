@@ -461,7 +461,6 @@ def connection(hosts_connect):
         if sync == 1:
             command = termi + " -q -e \'" + xpan + " -c \"ssh -p " + \
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
-            print(command)
         else:
             command = termi + " -q -e \'" + xpan + " -d -c \"ssh -p " + \
                 port + " {}\" " + user + "@" + fj.join(hosts_connect) + "\'"
@@ -895,6 +894,11 @@ if __name__ == '__main__':
 
                 string = answer.split(" ")[1]
                 hosts_connect = []
+                try:
+                    if answer.split(" ")[2] == "sync":
+                        sync = 1
+                except BaseException:
+                    pass
 
                 if "-" in string:
                     try:
@@ -988,12 +992,6 @@ if __name__ == '__main__':
 
                 print ("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to specified something ...") 
                 pass 
-
-                try:
-                    if answer.split(" ")[2] == "sync":
-                        sync = 1
-                except BaseException:
-                    pass
 
         elif answer.split(" ")[0] == "delete":
             lastkey = list(hosts_id_hash.items())
