@@ -646,7 +646,7 @@ def checKS():
                                      "xpanes"],
                                      universal_newlines=True,
                                      stderr=subprocess.PIPE))).split("\n")[0]
-        print(" Ok!!")
+        print(" " + bcolors.OKGREEN + "Ok!" + bcolors.ENDC)
 
     except subprocess.CalledProcessError:
 
