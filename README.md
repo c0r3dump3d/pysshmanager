@@ -130,7 +130,7 @@ Now you can interact with the prompt, for example:
     +----+---------------+---------+
     | 1  | 10.10.10.0/24 | default |
     +----+---------------+---------+
-    [✓] Please assign a group for this host [1]: 
+    [✓] Please assign a group for this host [1]: 1
     [✓] Scanning 1 host(s) ...
 
 
