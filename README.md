@@ -121,6 +121,13 @@ Now you can interact with the prompt, for example:
     +----+----------------+--------+
 ```
 
+* Add a single host:
+
+```
+    pysshmgr> addhost 192.168.1.45 
+
+```
+
 
  * You can list the host(s) detected:
  ```

@@ -6,7 +6,7 @@ __license__="""
 
 pySSHManager
 
-Version 0.2.0
+Version 0.2.2
 
 A simple Python3 script to manage SSH connection.
 
@@ -113,6 +113,7 @@ def help():
     print("[*] options:  Show the values of differents options.")
     print("[*] networks: Show networks.")
     print("[*] addnet: Add network.")
+    print("[*] addhost: Add a single host.")
     print("[*] delnet: Delete a network.")
     print("[*] procs: Show PID of terminal sessions process.")
     print("[*] kill: Kill terminal sessions process.")
@@ -394,6 +395,14 @@ def netInterface():
 
                                 networks.append(net)
                                 groups.append(group)
+
+def ipinNet(ip,net):
+
+    if ipaddress.ip_address(ip) in ipaddress.ip_network(net):
+        return True 
+
+    else:
+        return False
 
 def listProcs():
     
@@ -709,7 +718,7 @@ if __name__ == '__main__':
     # Read the configuration file
     welcome()
     print(
-        "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Starting pySSHManager v0.2.0 (https://github.com/c0r3dump3d/pysshmanager) at " +
+        "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Starting pySSHManager v0.2.2 (https://github.com/c0r3dump3d/pysshmanager) at " +
         time.strftime("%x") +
         " " +
         time.strftime("%X") +
@@ -733,7 +742,7 @@ if __name__ == '__main__':
     session = PromptSession(history=our_history)
     options = WordCompleter(['scan','list','help','?',
         'connect','reset','search','delete','save','set','options',
-        'networks','addnet','delnet','kill','procs'],ignore_case=True)
+        'networks','addnet','addhost','delnet','kill','procs'],ignore_case=True)
 
     while True:
         sync = 0
@@ -775,11 +784,17 @@ if __name__ == '__main__':
                             time.time() -
                             start_time,
                             "seconds.")
-                        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
-                        os.remove('hostfile.csv')
-                        writeCSV()
-                        print(
-                          "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
+
+                        if check == 1:
+
+                            print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
+                            os.remove('hostfile.csv')
+                            writeCSV()
+                            print(
+                                "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
+
+                        else:
+                            print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
 
                     else:
                         print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
@@ -803,11 +818,17 @@ if __name__ == '__main__':
                                 time.time() -
                                 start_time,
                                 "seconds.")
-                            print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
-                            os.remove('hostfile.csv')
-                            writeCSV()
-                            print(
-                            "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
+
+                            if check == 1:
+                                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
+                                os.remove('hostfile.csv')
+                                writeCSV()
+                                print(
+                                    "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
+
+                            else:
+                                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
+
 
                         else:
                             print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
@@ -822,6 +843,66 @@ if __name__ == '__main__':
         elif answer.split(" ")[0] == "list":
 
             showHOSTS()
+
+        elif answer.split(" ")[0] == "addhost":
+                
+            if not groups:
+                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need to add at least one network, use the command \'addnet\' for that.")
+
+            else:
+                
+                try:
+                    
+                    if validIPV4(answer.split(" ")[1]):
+                        extracNet(answer.split(" ")[1] + "/32")
+                        if chk != 0:
+                            showNetworks()
+                            try:
+                                num = input("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Please assign a group for this host [1]: ")
+                                if not num:
+                                    num = 0
+                                else:
+                                    num = int(num) - 1 
+
+                                target = networks[num]
+                                group = groups[num]
+
+                                if ipinNet(answer.split(" ")[1],target):
+
+                                    start_time = time.time()
+                                    check = connScan(hosts, port, group, target)
+                                    print(
+                                        "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Scan finished in",
+                                        time.time() -
+                                        start_time,
+                                        "seconds.")
+                                    if check == 1:
+                                        print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Updating hostfile.csv file ...")
+                                        os.remove('hostfile.csv')
+                                        writeCSV()
+                                        print(
+                                            "[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Some hosts were found ... (check with \'list\' command.)")
+
+                                    else:
+                                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] No host added.")
+
+                                else:
+
+                                    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] The host doesn't belong to this network.")
+
+                            except ValueError:
+                                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] This group/network doesn't exist.")
+
+                            except IndexError:
+                                print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] This group/network doesn't exist.")
+
+                        else:
+                            pass
+                    else:
+                        print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] Not valid Ip.")
+                    
+                except IndexError:
+                    print("[" + bcolors.FAIL + "✗" + bcolors.ENDC + "] You need specified a host Ip.")
 
         elif answer.split(" ")[0] == "addnet":
     
@@ -1094,19 +1175,19 @@ if __name__ == '__main__':
 
             if answer.split(" ")[1] == "port":
                 port = answer.split(" ")[2] 
-                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Port defined to vale {0}".format(port))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Port defined to value {0}".format(port))
 
             elif answer.split(" ")[1] == "user":
                 user = answer.split(" ")[2] 
-                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] User defined to vale {0}".format(user))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] User defined to value {0}".format(user))
 
             elif answer.split(" ")[1] == "terminal":
                 terminal = answer.split(" ")[2] 
-                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Terminal defined to vale {0}".format(terminal))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Terminal defined to value {0}".format(terminal))
 
             elif answer.split(" ")[1] == "group":
                 group = answer.split(" ")[2] 
-                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Default group defined to vale {0}".format(group))
+                print("[" + bcolors.OKGREEN+ "✓"+ bcolors.ENDC+"] Default group defined to value {0}".format(group))
 
             elif answer.split(" ")[1] == "default":
                 readConfig()
