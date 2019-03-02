@@ -125,6 +125,14 @@ Now you can interact with the prompt, for example:
 
 ```
     pysshmgr> addhost 192.168.1.45 
+    +----+---------------+---------+
+    | ID |   NETWORKS    | GROUPS  |
+    +----+---------------+---------+
+    | 1  | 10.10.10.0/24 | default |
+    +----+---------------+---------+
+    [✓] Please assign a group for this host [1]: 
+    [✓] Scanning 1 host(s) ...
+
 
 ```
 
