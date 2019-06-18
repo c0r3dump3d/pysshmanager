@@ -18,6 +18,7 @@ Previosly we need some python dependences:
   $ sudo pip install beautifultable
   $ sudo pip install configparser
   $ sudo pip install IPy
+  $ sudo pip install psutil
   
 ```
 Now <a href="https://github.com/greymd/tmux-xpanes/wiki/Installation">install xpanes</a>.
